@@ -1,0 +1,26 @@
+{
+  "name": "Just time",
+  "version": "1.0",
+  "author": "artur.chlad",
+  "description": "App shows just time like watchface",
+  "type": "feature",
+  "usage": "workout",
+  "modificationTime": 1773314833,
+  "in": [
+    { "name": "time", "source": "/Dev/Time/LocalTime/Min", "type": "get" }
+  ],
+  "out": [
+    { "name": "color", "shownName": "color","log": true },
+    { "name": "watchFace", "shownName": "watchFace", "log": true }
+  ],
+  "template": [
+    { "name": "t.html" },
+    { "name": "u.html" },
+    { "name": "v.html" },
+    { "name": "w.html" }
+  ],
+  "settings": [
+    {"shownName": "WatchFace", "path": "watchFace", "type":"enum", "values": ["basic", "line", "weak", "weakline"]},
+    {"shownName": "Color", "path": "color", "type":"enum", "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]}
+  ]
+}
