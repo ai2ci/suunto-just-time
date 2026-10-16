@@ -6,21 +6,23 @@
   "type": "feature",
   "usage": "workout",
   "modificationTime": 1773314833,
-  "in": [
-    { "name": "time", "source": "/Dev/Time/LocalTime/Min", "type": "get" }
-  ],
+  "in": [{ "name": "min", "source": "/Dev/Time/LocalTime/Min", "type": "subscribe" }],
   "out": [
-    { "name": "color", "shownName": "color","log": true },
-    { "name": "watchFace", "shownName": "watchFace", "log": true }
+    { "name": "color", "shownName": "color" },
+    { "name": "watchFace", "shownName": "watchFace" },
+    { "name": "hour_10", "shownName": "hour_10" },
+    { "name": "hour_01", "shownName": "hour_01" },
+    { "name": "minute_10", "shownName": "minute_10" },
+    { "name": "minute_01", "shownName": "minute_01" }
   ],
-  "template": [
-    { "name": "t.html" },
-    { "name": "u.html" },
-    { "name": "v.html" },
-    { "name": "w.html" }
-  ],
+  "template": [{ "name": "t.html" }, { "name": "u.html" }, { "name": "v.html" }, { "name": "w.html" }],
   "settings": [
-    {"shownName": "WatchFace", "path": "watchFace", "type":"enum", "values": ["basic", "line", "weak", "weakline"]},
-    {"shownName": "Color", "path": "color", "type":"enum", "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]}
+    { "shownName": "WatchFace", "path": "watchFace", "type": "enum", "values": ["basic", "line", "weak", "weakline"] },
+    {
+      "shownName": "Color",
+      "path": "color",
+      "type": "enum",
+      "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]
+    }
   ]
 }
