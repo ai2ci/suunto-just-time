@@ -1,18 +1,34 @@
 var loadExt = function(id) {
+  // 01 - get next template
+  // 02 - get watchFace id
+  // 03 - get color id
+  // 04 - get next color
+  // 05 - get RGB convert to int by color
+  // 06 - colors maps
+  // 07 - get shortname templete by id
+  // 08 - set time to outputs
   return evalFile('{file_path}/ext' + id + '.js');
 }
-
+// templates 
+//  - 't' basic during activity
+//  - 'u' without user inputs
+//  - 'v' settings
 var t = 't';
+// settings:
+//  - hour
+//  - minute
 var setting_mode = 'hour';
 
 function onExercisePause(input, output) {
   systemEvent('onExercisePause');
+  // switch to template with no user inputs
   t = 'u';
   unload("_cm"); 
 }
 
 function onExerciseContinue(input, output) {
   systemEvent('onExerciseContinue');
+  // switch to template base template
   t = 't';
   unload("_cm"); 
 }
@@ -20,10 +36,13 @@ function onExerciseContinue(input, output) {
 function evaluate(input, output) {}
 
 function onLoad(input, output) {
+  // load defaults from localStorrage
   output.color = loadExt('05')(localStorage.getItem("color"));
   output.watchFace = loadExt('02')(localStorage.getItem("watchFace"));
   
+  // parse time to outputs
   var min = parseInt((input.min % (24 * 3600)) / 60, 10);
+  // loadExt('08')(output, min);
 
   output.hour_01 = parseInt(((min / 60) % 24) % 10, 10);
   output.hour_10 = parseInt(((min / 60) % 24) / 10, 10);
@@ -35,6 +54,7 @@ function onLoad(input, output) {
 function onEvent(input, output, eventId) {
   if (eventId >= 1000) {
     var min = eventId - 1000;
+    // loadExt('08')(output, min);
 
     output.hour_01 = parseInt(((min / 60) % 24) % 10, 10);
     output.hour_10 = parseInt(((min / 60) % 24) / 10, 10);
@@ -77,6 +97,7 @@ function onEvent(input, output, eventId) {
 
   if (t == 't' && eventId == 2) { // comon template + long down press
     // switch to settings template
+    setting_mode = 'hour';
     t = 'v';
     unload("_cm");
     return;

@@ -4,28 +4,18 @@ var printDigit = function(d) {
   return String(Math.floor(d));
 };
 
-var color = '';
 var white = '#FFFFFF';
 var black = '#000000';
 var weak = '#AAAAAA';
 
 $.subscribe('/Zapp/{zapp_index}/Output/color', function (c) {
-  color = '#' + (c + 0x1000000).toString(16).slice(1);
+  var color = '#' + (c + 0x1000000).toString(16).slice(1);
   setStyle('#d', 'color', color);
 });
 
 $.subscribe('/Zapp/{zapp_index}/Output/watchFace', function (wf) {
-  if (wf == 0) {
-    setStyle('#m_10_core', 'color', white);
-    setStyle('#m_01_core', 'color', white);
-    setStyle('#m_10', 'color', black);
-    setStyle('#m_01', 'color', black);
-  } else {
-    setStyle('#m_10_core', 'color', black);
-    setStyle('#m_01_core', 'color', black);
-    setStyle('#m_10', 'color', white);
-    setStyle('#m_01', 'color', white);
-  }
+  setStyle('.core', 'color', wf==0?white:black);
+  setStyle('#minutes', 'color', wf==0?black:white);
 });
 
 $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
@@ -37,7 +27,7 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
   <div
     class="sp-d-xxl sp-vertical-center"
     id="d"
-    style="position: absolute; top: 0; left: 0; height: 100%; width: 50%;"
+    style="position: absolute; top: 0; left: 0; height: 100%; width: 50%;color:black"
   >
     <div style="position:absolute;left:20%;top:calc(50% - 55%e);width:80%;height:40%;" id="hd0">
       <eval input="/Zapp/{zapp_index}/Output/hour_10" outputFormat="script x => printDigit(x)" />
@@ -49,7 +39,7 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
   </div>
 
   <div
-    style="position: absolute; top: 0; left: 50%; height: 100%; width: 50%;"
+    style="position:absolute;top:0;left:50%;height:100%;width:50%;color:black;"
     id="minutes"
     class="sp-d-xxl sp-vertical-center"
   >
@@ -67,7 +57,7 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;color:black;" id="m_10_core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core" class="core">
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
     </div>
@@ -86,7 +76,7 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;color:black;" id="m_01_core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core" class="core">
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
     </div>

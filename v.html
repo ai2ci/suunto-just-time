@@ -11,23 +11,6 @@ var black = '#000000';
 var weak = '#AAAAAA';
 var watchFace;
 
-var applyWatchFace = function() {
-  if (watchFace == 0) {
-    setStyle('#m_10_core', 'color', white);
-    setStyle('#m_01_core', 'color', white);
-    setStyle('#m_10', 'color', black);
-    setStyle('#m_01', 'color', black);
-  } else {
-    setStyle('#m_10_core', 'color', black);
-    setStyle('#m_01_core', 'color', black);
-    setStyle('#m_10', 'color', white);
-    setStyle('#m_01', 'color', white);
-  }
-}
-var applyColor = function() {
-  setStyle('#d', 'color', color);
-}
-
 $.subscribe('/Zapp/{zapp_index}/Output/color', function (c) {
   color = '#' + (c + 0x1000000).toString(16).slice(1);
 });
@@ -43,26 +26,29 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
 
 var interval = setInterval(function() {
   if (mode == 'hour') {
-    setStyle('#d', 'color', '#000000');
+    setStyle('#d', 'color', black);
   } else {
-    setStyle('#m_10', 'color', black);
-    setStyle('#m_10_core', 'color', black);
-    setStyle('#m_01', 'color', black);
-    setStyle('#m_01_core', 'color', black);
+    setStyle('.core', 'color', black);
+    setStyle('#minutes', 'color', black);
   }
 
   setTimeout(function() {
-    applyColor();
-    applyWatchFace();
+    setStyle('#d', 'color', color);
+    setStyle('.core', 'color', watchFace==0?white:black);
+    setStyle('#minutes', 'color', watchFace==0?black:white);
   }, 500);
+}, 1000);
 
-}, 1000)
+var callEvent = function(eventId) {
+  $.put('/Zapp/{zapp_index}/Event', eventId, null, 'int32');
+  clearInterval(interval);
+};
 "
 >
   <div
     class="sp-d-xxl sp-vertical-center"
     id="d"
-    style="position: absolute; top: 0; left: 0; height: 100%; width: 50%;"
+    style="position: absolute; top: 0; left: 0; height: 100%; width: 50%;color:black"
   >
     <div style="position:absolute;left:20%;top:calc(50% - 55%e);width:80%;height:40%;" id="hd0">
       <eval input="/Zapp/{zapp_index}/Output/hour_10" outputFormat="script x => printDigit(x)" />
@@ -74,7 +60,7 @@ var interval = setInterval(function() {
   </div>
 
   <div
-    style="position: absolute; top: 0; left: 50%; height: 100%; width: 50%;"
+    style="position:absolute;top:0;left:50%;height:100%;width:50%;color:black;"
     id="minutes"
     class="sp-d-xxl sp-vertical-center"
   >
@@ -92,7 +78,7 @@ var interval = setInterval(function() {
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;color:black;" id="m_10_core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core" class="core">
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
     </div>
@@ -111,7 +97,7 @@ var interval = setInterval(function() {
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;color:black;" id="m_01_core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core" class="core">
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
     </div>
@@ -120,15 +106,15 @@ var interval = setInterval(function() {
   <userInput>
     <pushButton name="down" 
       onClick="$.put('/Zapp/{zapp_index}/Event', 1, null, 'int32');"
-      onLongPressStart="$.put('/Zapp/{zapp_index}/Event', 2, null, 'int32'); clearInterval(interval);"
+      onLongPressStart="callEvent(2);"
     />
     <pushButton name="next" 
       onClick="$.put('/Zapp/{zapp_index}/Event', 3, null, 'int32'); mode = mode == 'hour' ? 'minute' : 'hour'"
-      onLongPressStart="$.put('/Zapp/{zapp_index}/Event', 24, null, 'int32'); clearInterval(interval);"
+      onLongPressStart="callEvent(4);"
     />
     <pushButton name="up" 
       onClick="$.put('/Zapp/{zapp_index}/Event', 5, null, 'int32');"
-      onLongPressStart="$.put('/Zapp/{zapp_index}/Event', 6, null, 'int32'); clearInterval(interval);"
+      onLongPressStart="callEvent(6);"
     />
   </userInput>
 

@@ -1,6 +1,6 @@
-function(template) {
-  // get template id
-  switch(template) {
+function(watchFace) {
+  // get watchFace id
+  switch(watchFace) {
     case "line":
       return 1;
     case "weak":
