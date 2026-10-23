@@ -1,14 +1,5 @@
-function (template) {
-  // get next template
-  switch(template) {
-    case 0:
-      return "line";
-    // case 1:
-    //   return "weak";
-    // case 2:
-    //   return "weakline";
-    // case 3:
-    default:
-      return "basic";
-  }
+function (id, step) {
+  // getNextDigitStyle, step 1 = next, -1 = previous
+  var styles = ['basic', 'line', 'weak', 'weakline'];
+  return styles[(id + step + styles.length) % styles.length];
 }

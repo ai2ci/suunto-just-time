@@ -1,12 +1,11 @@
 var loadExt = function(id) {
-  // 01 - get next template
-  // 02 - get watchFace id
+  // 01 - get next digit style
+  // 02 - get digit style id
   // 03 - get color id
   // 04 - get next color
   // 05 - get RGB convert to int by color
   // 06 - colors maps
-  // 07 - get shortname templete by id
-  // 08 - set time to outputs
+  // 07 - get shortname template by id
   return evalFile('{file_path}/ext' + id + '.js');
 }
 // templates 
@@ -15,9 +14,9 @@ var loadExt = function(id) {
 //  - 'v' settings
 var t = 't';
 // settings:
-//  - hour
-//  - minute
-var setting_mode = 'hour';
+//  - color
+//  - digitStyle
+var setting_mode = 'color';
 
 function onExercisePause(input, output) {
   systemEvent('onExercisePause');
@@ -28,7 +27,7 @@ function onExercisePause(input, output) {
 
 function onExerciseContinue(input, output) {
   systemEvent('onExerciseContinue');
-  // switch to template base template
+  // switch to base template
   t = 't';
   unload("_cm"); 
 }
@@ -36,13 +35,12 @@ function onExerciseContinue(input, output) {
 function evaluate(input, output) {}
 
 function onLoad(input, output) {
-  // load defaults from localStorrage
+  // load defaults from localStorage
   output.color = loadExt('05')(localStorage.getItem("color"));
-  output.watchFace = loadExt('02')(localStorage.getItem("watchFace"));
+  output.digitStyle = loadExt('02')(localStorage.getItem("digitStyle"));
   
   // parse time to outputs
   var min = parseInt((input.min % (24 * 3600)) / 60, 10);
-  // loadExt('08')(output, min);
 
   output.hour_01 = parseInt(((min / 60) % 24) % 10, 10);
   output.hour_10 = parseInt(((min / 60) % 24) / 10, 10);
@@ -54,7 +52,6 @@ function onLoad(input, output) {
 function onEvent(input, output, eventId) {
   if (eventId >= 1000) {
     var min = eventId - 1000;
-    // loadExt('08')(output, min);
 
     output.hour_01 = parseInt(((min / 60) % 24) % 10, 10);
     output.hour_10 = parseInt(((min / 60) % 24) / 10, 10);
@@ -74,30 +71,31 @@ function onEvent(input, output, eventId) {
     }
 
     switch (eventId) {
-      case 1: // Up
-      case 5: // Down
-        if (setting_mode == 'hour') {
+      case 5: // Up - next value
+      case 1: // Down - previous value
+        var step = eventId == 5 ? 1 : -1;
+        if (setting_mode == 'color') {
           var color = localStorage.getItem("color");
-          color = loadExt('04')(color);
+          color = loadExt('04')(color, step);
           localStorage.setItem("color", color);
           output.color = loadExt('05')(color);
         } else {
-          var template = localStorage.getItem("watchFace");
-          template = loadExt('01')(loadExt('02')(template));
-          localStorage.setItem("watchFace", template);
-          output.watchFace = loadExt('02')(template);
+          var digitStyle = localStorage.getItem("digitStyle");
+          digitStyle = loadExt('01')(loadExt('02')(digitStyle), step);
+          localStorage.setItem("digitStyle", digitStyle);
+          output.digitStyle = loadExt('02')(digitStyle);
         }
 
         break;
       case 3: // middle
-          setting_mode = setting_mode == 'hour' ? 'minute' : 'hour';
+          setting_mode = setting_mode == 'color' ? 'digitStyle' : 'color';
         break;
     }
   }
 
-  if (t == 't' && eventId == 2) { // comon template + long down press
+  if (t == 't' && eventId == 2) { // common template + long down press
     // switch to settings template
-    setting_mode = 'hour';
+    setting_mode = 'color';
     t = 'v';
     unload("_cm");
     return;
@@ -107,7 +105,7 @@ function onEvent(input, output, eventId) {
 
 
 function getUserInterface() {
-  // var templateId = loadExt('02')(localStorage.getItem("watchFace"));
+  // var templateId = loadExt('02')(localStorage.getItem("digitStyle"));
   // return { template: loadExt('07')(templateId) };
   systemEvent('template', t);
   return { template: t };

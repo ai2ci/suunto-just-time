@@ -24,8 +24,8 @@ VS Code rozšíření **SuuntoPlus Editor** (`~/.vscode/extensions/suunto.suunto
 | `v.html` | Režim nastavení (blikání vybrané části, změna barvy / ciferníku) |
 | `w.html` | Starší varianta (čas počítaný přímo v šabloně), v manifestu, ale `getUserInterface` ji nevrací |
 | `v-touching.html` | Experiment s dotykovým ovládáním — **není v manifestu** |
-| `ext01.js`–`ext08.js` | Externí funkce načítané z flash přes `evalFile` (šetří stack/heap) |
-| `data.json` | Výchozí hodnoty nastavení (`watchFace`, `color`) |
+| `ext01.js`–`ext07.js` | Externí funkce načítané z flash přes `evalFile` (šetří stack/heap) |
+| `data.json` | Výchozí hodnoty nastavení (`digitStyle`, `color`) |
 | `~/.vscode/extensions/suunto.suuntoplus-editor-1.42.0/developer-doc/reference.html` | Oficiální SuuntoPlus reference dodaná s rozšířením — **primární zdroj pravdy o API** (cesta platí pro verzi 1.42.0, po aktualizaci rozšíření ji ověř) |
 | `private/` | Složka v `.gitignore` — necommitovat, nevkládat do veřejných výstupů |
 | `*.fea`, `*.zip` | Build výstup editoru, v `.gitignore` — necommitovat, neupravovat |
@@ -34,14 +34,13 @@ VS Code rozšíření **SuuntoPlus Editor** (`~/.vscode/extensions/suunto.suunto
 
 | ID | Funkce | Používá se |
 |---|---|---|
-| 01 | další ciferník podle id (zatím jen `basic` ↔ `line`) | ano |
+| 01 | další / předchozí styl číslic podle id (`basic` → `line` → `weak` → `weakline`, `step` 1 / -1) | ano |
 | 02 | název ciferníku → id (0–3) | ano |
 | 03 | název barvy → index | ne |
-| 04 | další barva v cyklu | ano |
+| 04 | další / předchozí barva (`step` 1 / -1) | ano |
 | 05 | název barvy → RGB int | ano |
 | 06 | tabulka barev (pole) | ne |
 | 07 | id šablony → písmeno šablony | ne (zakomentováno) |
-| 08 | rozpad minut dne do `output.hour_10/…` | ne (logika je zatím inline v `main.js`) |
 
 Každý `extNN.js` obsahuje **jeden anonymní výraz** (funkci nebo literál) bez středníku a bez
 deklarace jména — `evalFile` vrací jeho hodnotu. Seznam ID je okomentovaný v `loadExt` v `main.js`;
@@ -57,11 +56,11 @@ při přidání/změně ext souboru ho aktualizuj.
   - `1` down click, `3` next (middle) click, `5` up click
   - `2` / `4` / `6` long press down / next / up
   - `≥ 1000` aktualizace času
-- **Nastavení (`v`)**: middle přepíná `setting_mode` (`hour` = barva, `minute` = ciferník),
+- **Nastavení (`v`)**: middle přepíná `setting_mode` (`color` = barva, `digitStyle` = styl číslic), horní tlačítko (`5`) posouvá hodnotu dopředu, dolní (`1`) dozadu,
   up/down mění hodnotu, libovolný long press se vrací do `t`. Hodnoty se ukládají do `localStorage`
-  (klíče `color`, `watchFace` — shodné s `path` v `manifest.json` → `settings`).
+  (klíče `color`, `digitStyle` — shodné s `path` v `manifest.json` → `settings`).
 - **Výstupy do šablon**: `output.color` (RGB int → v šabloně převedeno na `#rrggbb`),
-  `output.watchFace` (id 0–3). Šablony je čtou přes `$.subscribe('/Zapp/{zapp_index}/Output/<name>')`
+  `output.digitStyle` (id 0–3; `basic` a `line` = bílé/černé minuty, `weak` a `weakline` = šedé minuty, barvy v `coreColors`/`outlineColors` v šablonách). Šablony je čtou přes `$.subscribe('/Zapp/{zapp_index}/Output/<name>')`
   nebo `<eval input=…>`.
 - **Pauza**: `onExercisePause` přepne na `u` (bez `userInput`), `onExerciseContinue` zpět na `t`.
 

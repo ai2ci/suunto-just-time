@@ -1,22 +1,7 @@
-function (color) {
-  // getNextColor
-  switch(color) {
-    case 'red':
-      return 'green'
-    case 'green':
-      return 'blue';
-    case 'blue':
-      return 'azure';
-    case 'azure':
-      return 'yellow';
-    case 'yellow':
-      return 'orange';
-    case 'orange':
-      return 'grey';
-    case 'grey':
-      return 'white';
-    case 'white':
-    default:
-      return 'red';
-  }
+function (color, step) {
+  // getNextColor, step 1 = next, -1 = previous
+  var colors = ['red', 'green', 'blue', 'azure', 'yellow', 'orange', 'grey', 'white'];
+  var index = colors.indexOf(color);
+  if (index < 0) return 'red';
+  return colors[(index + step + colors.length) % colors.length];
 }

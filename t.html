@@ -13,9 +13,17 @@ $.subscribe('/Zapp/{zapp_index}/Output/color', function (c) {
   setStyle('#d', 'color', color);
 });
 
-$.subscribe('/Zapp/{zapp_index}/Output/watchFace', function (wf) {
-  setStyle('.core', 'color', wf==0?white:black);
-  setStyle('#minutes', 'color', wf==0?black:white);
+var coreColors = [white, black, weak, black];
+var outlineColors = [black, white, black, weak];
+
+var applyDigitStyle = function(ds) {
+  setStyle('#m_10_core', 'color', coreColors[ds]);
+  setStyle('#m_01_core', 'color', coreColors[ds]);
+  setStyle('#minutes', 'color', outlineColors[ds]);
+};
+
+$.subscribe('/Zapp/{zapp_index}/Output/digitStyle', function (ds) {
+  applyDigitStyle(ds);
 });
 
 $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
@@ -57,7 +65,7 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core" class="core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core">
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
     </div>
@@ -76,7 +84,7 @@ $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core" class="core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core">
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
     </div>

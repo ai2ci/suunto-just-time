@@ -9,14 +9,22 @@ var color = '';
 var white = '#FFFFFF';
 var black = '#000000';
 var weak = '#AAAAAA';
-var watchFace;
+var digitStyle = 0;
+var coreColors = [white, black, weak, black];
+var outlineColors = [black, white, black, weak];
+
+var applyDigitStyle = function(ds) {
+  setStyle('#m_10_core', 'color', coreColors[ds]);
+  setStyle('#m_01_core', 'color', coreColors[ds]);
+  setStyle('#minutes', 'color', outlineColors[ds]);
+};
 
 $.subscribe('/Zapp/{zapp_index}/Output/color', function (c) {
   color = '#' + (c + 0x1000000).toString(16).slice(1);
 });
 
-$.subscribe('/Zapp/{zapp_index}/Output/watchFace', function (wf) {
-  watchFace = wf;
+$.subscribe('/Zapp/{zapp_index}/Output/digitStyle', function (ds) {
+  digitStyle = ds;
 });
 
 $.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
@@ -28,14 +36,14 @@ var interval = setInterval(function() {
   if (mode == 'hour') {
     setStyle('#d', 'color', black);
   } else {
-    setStyle('.core', 'color', black);
+    setStyle('#m_10_core', 'color', black);
+    setStyle('#m_01_core', 'color', black);
     setStyle('#minutes', 'color', black);
   }
 
   setTimeout(function() {
     setStyle('#d', 'color', color);
-    setStyle('.core', 'color', watchFace==0?white:black);
-    setStyle('#minutes', 'color', watchFace==0?black:white);
+    applyDigitStyle(digitStyle);
   }, 500);
 }, 1000);
 
@@ -78,7 +86,7 @@ var callEvent = function(eventId) {
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core" class="core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core">
         <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
       </div>
     </div>
@@ -97,7 +105,7 @@ var callEvent = function(eventId) {
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
 
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core" class="core">
+      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core">
         <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
       </div>
     </div>

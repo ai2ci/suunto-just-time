@@ -1,6 +1,6 @@
-function(watchFace) {
-  // get watchFace id
-  switch(watchFace) {
+function(digitStyle) {
+  // get digit style id
+  switch(digitStyle) {
     case "line":
       return 1;
     case "weak":
