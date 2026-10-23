@@ -13,13 +13,17 @@
     { "name": "minuteColor", "shownName": "minuteColor" },
     { "name": "settingMode", "shownName": "settingMode" }
   ],
-  "template": [{ "name": "t.html" }, { "name": "u.html" }, { "name": "v.html" }, { "name": "w.html" }],
+  "template": [
+    { "name": "t.html", "displays": ["q", "o", "n"] },
+    { "name": "u.html", "displays": ["q", "o", "n"] },
+    { "name": "v.html", "displays": ["q", "o", "n"] }
+  ],
   "settings": [
     {
       "shownName": "Font type",
       "path": "fontType",
       "type": "enum",
-      "values": ["hh-basic mm-basic", "hh-line mm-basic", "hh-basic mm-line", "hh-line mm-line"]
+      "values": ["hh-solid mm-solid", "hh-outline mm-solid", "hh-solid mm-outline", "hh-outline mm-outline"]
     },
     {
       "shownName": "Hour color",
@@ -36,7 +40,11 @@
   ],
 
   "image": [
-    { "name": "aod-q.png", "type": "a64" },
-    { "name": "font-q.png", "type": "alpha2bit" }
+    { "name": "solid-q.png", "type": "alpha2bit" },
+    { "name": "outline-q.png", "type": "a64" },
+    { "name": "solid-o.png", "type": "alpha2bit" },
+    { "name": "outline-o.png", "type": "a64" },
+    { "name": "solid-n.png", "type": "alpha2bit" },
+    { "name": "outline-n.png", "type": "a64" }
   ]
 }

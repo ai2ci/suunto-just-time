@@ -1,13 +1,13 @@
 function(fontType) {
-  // get font type id: bit 0 = hour digits in line font, bit 1 = minute digits in line font
+  // get font type id: bit 0 = hour digits in outline font, bit 1 = minute digits in outline font
   switch(fontType) {
-    case "hh-line mm-basic":
+    case "hh-outline mm-solid":
       return 1;
-    case "hh-basic mm-line":
+    case "hh-solid mm-outline":
       return 2;
-    case "hh-line mm-line":
+    case "hh-outline mm-outline":
       return 3;
-    case "hh-basic mm-basic":
+    case "hh-solid mm-solid":
     default:
       return 0;
   }

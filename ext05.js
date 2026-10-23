@@ -11,12 +11,15 @@ function (color) {
       return parseInt('aaaa00', 16);
     case 'orange':
       return parseInt('aa5500', 16);
+    case 'gray': // alias of grey
     case 'grey':
       return parseInt('555555', 16);
     case 'white':
       return parseInt('999999', 16);
     case 'red':
-      default:
+      return parseInt('aa0000', 16);
+    default:
+      systemEvent('unknown color ', color);
       return parseInt('aa0000', 16);
   }
 

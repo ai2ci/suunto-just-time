@@ -1,5 +1,5 @@
 {
-    "fontType": "hh-line mm-line",
+    "fontType": "hh-outline mm-outline",
     "hourColor": "grey",
     "minuteColor": "white"
 }

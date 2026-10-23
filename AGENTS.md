@@ -4,10 +4,10 @@ Instrukce pro AI agenty (Claude Code, Codex, Copilot…) pracující v tomto rep
 
 ## Co to je
 
-**SuuntoPlus sports app „Just time“** pro hodinky Suunto (UI2, primárně display `q` 466×466 px —
-Race, Race S, Race 2, Vertical 2, Ocean). Během aktivity zobrazuje jen velký čas (HH:MM) jako ciferník
-vykreslený z obrázků (sprite pásy číslic). Hodinové a minutové číslice mají každé svůj font
-(`basic` = `font-q.png`, `line` = `aod-q.png`) a svou barvu. Nastavení jde měnit přímo na hodinkách
+**SuuntoPlus sports app „Just time“** pro hodinky Suunto (UI2: display `q` 466×466 px — Race, Race S,
+Race 2, Vertical 2, Ocean; `o` 280×280 px — Vertical; `n` 240×240 px — 9 Peak Pro). Během aktivity zobrazuje jen velký čas (HH:MM) jako ciferník
+vykreslený z obrázků (sprite pásy číslic, font Sarabun Bold). Hodinové a minutové číslice mají každé
+svůj font (`solid` = plné číslice `solid-<display>.png`, `outline` = obrysové `outline-<display>.png`) a svou barvu. Nastavení jde měnit přímo na hodinkách
 tlačítky nebo přes `settings` v aplikaci Suunto.
 
 Nejde o webovou aplikaci. Kód běží v omezeném JS enginu hodinek (ESW), ne v prohlížeči ani v Node.js.
@@ -23,13 +23,23 @@ VS Code rozšíření **SuuntoPlus Editor** (`~/.vscode/extensions/suunto.suunto
 | `t.html` | Hlavní šablona během aktivity; dlouhý stisk **down** → nastavení |
 | `u.html` | Stejný ciferník bez `<userInput>` — používá se během pauzy (tlačítka patří systému) |
 | `v.html` | Režim nastavení (blikání vybrané části, změna fontu / barev) |
-| `w.html` | Starší varianta (čas počítaný přímo v šabloně), v manifestu, ale `getUserInterface` ji nevrací |
-| `font-q.png`, `aod-q.png` | Sprite pásy číslic 0–9 (800×110 px, bílé; barvu dává CSS `color`). `font-q.png` = font `basic`, `aod-q.png` = font `line`. Reference povoluje max. 2 obrázky na app |
-| `ext01.js`–`ext07.js` | Externí funkce načítané z flash přes `evalFile` (šetří stack/heap) |
+| `solid-{q,o,n}.png`, `outline-{q,o,n}.png` | Sprite pásy číslic 0–9 pro jednotlivé displeje (bílé na průhledném, barvu dává CSS `color`): `q` buňka 80×110 px (pás 800×110), `o` 48×66 px (480×66), `n` 40×56 px (400×56). `solid-*` (plné), `outline-*` (obrys). Reference povoluje max. 2 obrázky na app — při buildu pro jeden displej se použijí dva |
+| `ext01.js`, `ext02.js`, `ext04.js`, `ext05.js` | Externí funkce načítané z flash přes `evalFile` (šetří stack/heap) |
 | `data.json` | Výchozí hodnoty nastavení (`fontType`, `hourColor`, `minuteColor`) |
 | `~/.vscode/extensions/suunto.suuntoplus-editor-1.42.0/developer-doc/reference.html` | Oficiální SuuntoPlus reference dodaná s rozšířením — **primární zdroj pravdy o API** (cesta platí pro verzi 1.42.0, po aktualizaci rozšíření ji ověř) |
-| `private/` | Složka v `.gitignore` — necommitovat, nevkládat do veřejných výstupů |
+| `private/` | Složka v `.gitignore` — necommitovat, nevkládat do veřejných výstupů. Obsahuje i `private/font-strip` (generátor pásů číslic z TTF, `node generate.mjs`) |
 | `*.fea`, `*.zip` | Build výstup editoru, v `.gitignore` — necommitovat, neupravovat |
+
+### Obrázky číslic (jak se generují)
+
+Pásy se vyrábějí lokálním skriptem (není v repozitáři, je v `private/`) z fontu Sarabun Bold
+(`private/font-strip/fonts/Sarabun-Bold.ttf`, licence OFL). Z adresáře `private/font-strip`:
+
+    node generate.mjs fonts/Sarabun-Bold.ttf --display all --prefix solid --style fill --out ../..
+    node generate.mjs fonts/Sarabun-Bold.ttf --display q --prefix outline --style outline --stroke 3 --out ../..
+    node generate.mjs fonts/Sarabun-Bold.ttf --display o,n --prefix outline --style outline --stroke 2 --out ../..
+
+Při změně velikosti buňky v `generate.mjs` uprav i rozměry skupiny číslic v šablonách (viz níže).
 
 ### Externí funkce (`loadExt('NN')`)
 
@@ -37,11 +47,8 @@ VS Code rozšíření **SuuntoPlus Editor** (`~/.vscode/extensions/suunto.suunto
 |---|---|---|
 | 01 | další / předchozí `fontType` podle id (`step` 1 / -1) | ano |
 | 02 | název `fontType` → id (0–3) | ano |
-| 03 | název barvy → index | ne |
 | 04 | další / předchozí barva (`step` 1 / -1) | ano |
 | 05 | název barvy → RGB int | ano |
-| 06 | tabulka barev (pole) | ne |
-| 07 | id šablony → písmeno šablony | ne (zakomentováno) |
 
 Každý `extNN.js` obsahuje **jeden anonymní výraz** (funkci nebo literál) bez středníku a bez
 deklarace jména — `evalFile` vrací jeho hodnotu. Seznam ID je okomentovaný v `loadExt` v `main.js`;
@@ -53,9 +60,12 @@ při přidání/změně ext souboru ho aktualizuj.
   `unload("_cm")`, hodinky pak znovu zavolají `getUserInterface()`.
 - **Čas**: šablony si čas berou samy z `/Dev/Time/LocalTime/Min` (`$.get` + `$.subscribe`) a posouvají
   sprite pásy číslic (`left: -100*číslice %`). `main.js` čas nezpracovává.
-- **Číslice**: každá pozice (hodina 1/2, minuta 1/2) má dva `<img>` (`hb1`/`hl1`, `hb2`/`hl2`, `mb1`/`ml1`,
-  `mb2`/`ml2` — `b` = basic, `l` = line), viditelný je jen ten ve zvoleném fontu. Čtyři buňky 80×110 px
-  jsou vycentrované v procentech (`calc(50% - 50%e)`), ne v pixelech. Vpravo od minut je v dolní polovině
+- **Číslice**: každá pozice (hodina 1/2, minuta 1/2) má dva `<img>` (`hs1`/`ho1`, `hs2`/`ho2`, `ms1`/`mo1`,
+  `ms2`/`mo2` — `s` = solid, `o` = outline), viditelný je jen ten ve zvoleném fontu. Čtyři buňky jsou
+  vycentrované v procentech (`calc(50% - 50%e)`), ne v pixelech. Rozměry se liší podle displeje, proto
+  jsou v šabloně tři bloky `<:if test="('{{DISPLAY_ID}}' == 'q')">` / `<:elseif … 'o'>` / `<:else>` (n)
+  s jinou šířkou/výškou skupiny (`4*šířka buňky / šířka displeje`, např. q = 68,670 %) a jinými obrázky.
+  Šířka buňky v pixelech musí přesně sedět na buňku v pásu, jinak se posun `left: -100*číslice %` rozjede. Vpravo od minut je v dolní polovině
   řádku číslic malý text AM/PM (`f-t-s`, jen při 12hodinovém formátu hodinek).
 - **Bez bliknutí**: číslice jsou zprvu `visibility:hidden` a odkryjí se až po příchodu času, obou fontů
   a obou barev (`pending`/`setReady` v šabloně); po 1 s se odkryjí i tak (záloha).
@@ -68,7 +78,7 @@ při přidání/změně ext souboru ho aktualizuj.
   `onLongPressFull` se nepoužívá, protože se nevolá spolehlivě. `onLongPressCancel` a `onLongPress` volají
   jen `ringStop()`.
 - **Nastavení (`v`)**: tři nastavení, mezi kterými přepíná middle (`setting_mode` 0 → 1 → 2 → 0):
-  - `0` `fontType` — `hh-basic mm-basic`, `hh-line mm-basic`, `hh-basic mm-line`, `hh-line mm-line` (bliká vše),
+  - `0` `fontType` — `hh-solid mm-solid`, `hh-outline mm-solid`, `hh-solid mm-outline`, `hh-outline mm-outline` (bliká vše),
   - `1` `hourColor` (blikají hodinové číslice),
   - `2` `minuteColor` (blikají minutové číslice).
 
@@ -78,7 +88,7 @@ při přidání/změně ext souboru ho aktualizuj.
   (`stopBlink`) a při zrušení stisku znovu spustí (`startBlink`).
   Hodnoty se ukládají do `localStorage` (klíče `fontType`, `hourColor`, `minuteColor` — shodné s `path`
   v `manifest.json` → `settings` a s klíči v `data.json`).
-- **Výstupy do šablon**: `output.hourFont`, `output.minuteFont` (0 = basic, 1 = line, odvozeno z `fontType`
+- **Výstupy do šablon**: `output.hourFont`, `output.minuteFont` (0 = solid, 1 = outline, odvozeno z `fontType`
   v `setFontOutputs`), `output.hourColor`, `output.minuteColor` (RGB int → v šabloně `toHex` na `#rrggbb`),
   `output.settingMode` (0–2, podle něj `v.html` bliká). Šablony je čtou přes
   `$.subscribe('/Zapp/{zapp_index}/Output/<name>')`.
@@ -103,6 +113,8 @@ při přidání/změně ext souboru ho aktualizuj.
 6. **Manifest**: každá nová `out` hodnota, šablona nebo zdroj musí být v `manifest.json`.
    Neexistující `source` v `in` způsobí, že se aplikace na hodinkách vůbec nenačte.
    Hodnoty v `settings.values` musí odpovídat tomu, co znají `ext01/02/04/05`.
+   Šablony mají `"displays": ["q", "o", "n"]` (UI1 displeje `s`, `m`, `l` nejsou podporované a nemají obrázky);
+   každý obrázek z `src` v šablonách musí být v `image` a existovat pro všechny tři displeje.
 7. **Ladění**: používej `systemEvent('popis', hodnota)` — výstup je vidět v simulátoru/logu editoru.
    Před commitem zbytečné ladicí výpisy zvaž/odstraň.
 8. **Komentáře v kódu anglicky**, stručně, ve stylu existujících (`// 05 - get RGB …`).

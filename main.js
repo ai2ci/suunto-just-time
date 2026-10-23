@@ -1,20 +1,17 @@
 var loadExt = function(id) {
   // 01 - get next font type
   // 02 - get font type id
-  // 03 - get color id
   // 04 - get next color
   // 05 - get RGB convert to int by color
-  // 06 - colors maps
-  // 07 - get shortname template by id
   return evalFile('{file_path}/ext' + id + '.js');
 }
 // templates
-//  - 't' basic during activity
+//  - 't' main during activity
 //  - 'u' without user inputs
 //  - 'v' settings
 var t = 't';
 // settings (middle button switches between them):
-//  - 0 fontType (hour and minute digits, each basic or line)
+//  - 0 fontType (hour and minute digits, each solid or outline)
 //  - 1 hourColor
 //  - 2 minuteColor
 var setting_mode = 0;
@@ -23,7 +20,7 @@ var getSetting = function(key, defaultValue) {
   return localStorage.getItem(key) || defaultValue;
 }
 
-// fontType id: bit 0 = hour digits use line font, bit 1 = minute digits use line font
+// fontType id: bit 0 = hour digits use outline font, bit 1 = minute digits use outline font
 var setFontOutputs = function(output, fontType) {
   var id = loadExt('02')(fontType);
   output.hourFont = id % 2;
@@ -31,14 +28,12 @@ var setFontOutputs = function(output, fontType) {
 }
 
 function onExercisePause(input, output) {
-  systemEvent('onExercisePause');
   // switch to template with no user inputs
   t = 'u';
   unload("_cm");
 }
 
 function onExerciseContinue(input, output) {
-  systemEvent('onExerciseContinue');
   // switch to base template
   t = 't';
   unload("_cm");
@@ -48,7 +43,7 @@ function evaluate(input, output) {}
 
 function onLoad(input, output) {
   // load defaults from localStorage
-  setFontOutputs(output, getSetting("fontType", "hh-line mm-line"));
+  setFontOutputs(output, getSetting("fontType", "hh-outline mm-outline"));
   output.hourColor = loadExt('05')(getSetting("hourColor", "white"));
   output.minuteColor = loadExt('05')(getSetting("minuteColor", "grey"));
   output.settingMode = setting_mode;
@@ -56,8 +51,6 @@ function onLoad(input, output) {
 
 
 function onEvent(input, output, eventId) {
-  systemEvent('eventId ', eventId);
-
   // during settings
   if (t == 'v') {
     if (eventId == 4 || eventId == 6 || eventId == 2) { // long press any button
@@ -72,7 +65,7 @@ function onEvent(input, output, eventId) {
       case 1: // Down - previous value
         var step = eventId == 5 ? 1 : -1;
         if (setting_mode == 0) {
-          var fontType = loadExt('01')(loadExt('02')(getSetting("fontType", "hh-line mm-line")), step);
+          var fontType = loadExt('01')(loadExt('02')(getSetting("fontType", "hh-outline mm-outline")), step);
           localStorage.setItem("fontType", fontType);
           setFontOutputs(output, fontType);
         } else if (setting_mode == 1) {
@@ -106,7 +99,6 @@ function onEvent(input, output, eventId) {
 
 
 function getUserInterface() {
-  systemEvent('template', t);
   return { template: t };
 }
 
