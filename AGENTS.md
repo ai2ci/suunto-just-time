@@ -87,7 +87,9 @@ při přidání/změně ext souboru ho aktualizuj.
   zobrazení číslic začíná zhasnutím (prvních 500 ms nic), při dlouhém stisku se blikání zastaví
   (`stopBlink`) a při zrušení stisku znovu spustí (`startBlink`).
   Hodnoty se ukládají do `localStorage` (klíče `fontType`, `hourColor`, `minuteColor` — shodné s `path`
-  v `manifest.json` → `settings` a s klíči v `data.json`).
+  v `manifest.json` → `settings` a s klíči v `data.json`). Výchozí hodnoty jsou ve dvou místech, které musí
+  zůstat stejné: `data.json` a objekt `DEFAULTS` na začátku `main.js` (použije se, když v `localStorage`
+  ještě nic není).
 - **Výstupy do šablon**: `output.hourFont`, `output.minuteFont` (0 = solid, 1 = outline, odvozeno z `fontType`
   v `setFontOutputs`), `output.hourColor`, `output.minuteColor` (RGB int → v šabloně `toHex` na `#rrggbb`),
   `output.settingMode` (0–2, podle něj `v.html` bliká). Šablony je čtou přes
@@ -116,7 +118,8 @@ při přidání/změně ext souboru ho aktualizuj.
    Šablony mají `"displays": ["q", "o", "n"]` (UI1 displeje `s`, `m`, `l` nejsou podporované a nemají obrázky);
    každý obrázek z `src` v šablonách musí být v `image` a existovat pro všechny tři displeje.
 7. **Ladění**: používej `systemEvent('popis', hodnota)` — výstup je vidět v simulátoru/logu editoru.
-   Před commitem zbytečné ladicí výpisy zvaž/odstraň.
+   Před commitem zbytečné ladicí výpisy odstraň; výjimka jsou diagnostické logy neplatných dat
+   (`unknown color` v `ext04.js` / `ext05.js`).
 8. **Komentáře v kódu anglicky**, stručně, ve stylu existujících (`// 05 - get RGB …`).
    Formátování: 2 mezery, středníky.
 9. **Neupravuj** `LICENSE`, `*.fea`, ani soubory v `private/` (jsou určené jen lokálně).

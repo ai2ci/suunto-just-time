@@ -143,9 +143,10 @@
     ">
 
   <div id="content" style="width:100%;height:100%;">
-    <!-- AM/PM 12H: small text right of the minutes, in the lower half of the digit row -->
+    <!-- AM/PM 12H: small text right of the minutes, in the lower half of the digit row. Centered (92%) in the free
+         space right of the digits (digit group ends at 83.3-84.3% on q, o and n), 13% wide so it never touches them -->
     <:if test="!{SETTING_TIME_24H}">
-      <div class="f-t-s" style="left:calc(90.4% - 50%e);top:calc(56% - 50%e);width:12%;text-align:center;">
+      <div class="f-t-s" style="left:calc(92% - 50%e);top:calc(56% - 50%e);width:13%;text-align:center;">
         <eval input="/Dev/Time/LocalTime/Min" outputFormat="time ?tt" />
       </div>
     </:if>
