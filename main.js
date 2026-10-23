@@ -1,6 +1,6 @@
 var loadExt = function(id) {
-  // 01 - get next digit style
-  // 02 - get digit style id
+  // 01 - get next font type
+  // 02 - get font type id
   // 03 - get color id
   // 04 - get next color
   // 05 - get RGB convert to int by color
@@ -8,57 +8,54 @@ var loadExt = function(id) {
   // 07 - get shortname template by id
   return evalFile('{file_path}/ext' + id + '.js');
 }
-// templates 
+// templates
 //  - 't' basic during activity
 //  - 'u' without user inputs
 //  - 'v' settings
 var t = 't';
-// settings:
-//  - color
-//  - digitStyle
-var setting_mode = 'color';
+// settings (middle button switches between them):
+//  - 0 fontType (hour and minute digits, each basic or line)
+//  - 1 hourColor
+//  - 2 minuteColor
+var setting_mode = 0;
+
+var getSetting = function(key, defaultValue) {
+  return localStorage.getItem(key) || defaultValue;
+}
+
+// fontType id: bit 0 = hour digits use line font, bit 1 = minute digits use line font
+var setFontOutputs = function(output, fontType) {
+  var id = loadExt('02')(fontType);
+  output.hourFont = id % 2;
+  output.minuteFont = parseInt(id / 2, 10);
+}
 
 function onExercisePause(input, output) {
   systemEvent('onExercisePause');
   // switch to template with no user inputs
   t = 'u';
-  unload("_cm"); 
+  unload("_cm");
 }
 
 function onExerciseContinue(input, output) {
   systemEvent('onExerciseContinue');
   // switch to base template
   t = 't';
-  unload("_cm"); 
+  unload("_cm");
 }
 
 function evaluate(input, output) {}
 
 function onLoad(input, output) {
   // load defaults from localStorage
-  output.color = loadExt('05')(localStorage.getItem("color"));
-  output.digitStyle = loadExt('02')(localStorage.getItem("digitStyle"));
-  
-  // parse time to outputs
-  var min = parseInt((input.min % (24 * 3600)) / 60, 10);
-
-  output.hour_01 = parseInt(((min / 60) % 24) % 10, 10);
-  output.hour_10 = parseInt(((min / 60) % 24) / 10, 10);
-  output.minute_01 = parseInt((min % 60) % 10, 10);
-  output.minute_10 = parseInt((min % 60) / 10, 10);
+  setFontOutputs(output, getSetting("fontType", "hh-basic mm-basic"));
+  output.hourColor = loadExt('05')(getSetting("hourColor", "red"));
+  output.minuteColor = loadExt('05')(getSetting("minuteColor", "white"));
+  output.settingMode = setting_mode;
 }
 
 
 function onEvent(input, output, eventId) {
-  if (eventId >= 1000) {
-    var min = eventId - 1000;
-
-    output.hour_01 = parseInt(((min / 60) % 24) % 10, 10);
-    output.hour_10 = parseInt(((min / 60) % 24) / 10, 10);
-    output.minute_01 = parseInt((min % 60) % 10, 10);
-    output.minute_10 = parseInt((min % 60) / 10, 10);
-    return;
-  }
   systemEvent('eventId ', eventId);
 
   // during settings
@@ -74,28 +71,32 @@ function onEvent(input, output, eventId) {
       case 5: // Up - next value
       case 1: // Down - previous value
         var step = eventId == 5 ? 1 : -1;
-        if (setting_mode == 'color') {
-          var color = localStorage.getItem("color");
-          color = loadExt('04')(color, step);
-          localStorage.setItem("color", color);
-          output.color = loadExt('05')(color);
+        if (setting_mode == 0) {
+          var fontType = loadExt('01')(loadExt('02')(getSetting("fontType", "hh-basic mm-basic")), step);
+          localStorage.setItem("fontType", fontType);
+          setFontOutputs(output, fontType);
+        } else if (setting_mode == 1) {
+          var hourColor = loadExt('04')(getSetting("hourColor", "red"), step);
+          localStorage.setItem("hourColor", hourColor);
+          output.hourColor = loadExt('05')(hourColor);
         } else {
-          var digitStyle = localStorage.getItem("digitStyle");
-          digitStyle = loadExt('01')(loadExt('02')(digitStyle), step);
-          localStorage.setItem("digitStyle", digitStyle);
-          output.digitStyle = loadExt('02')(digitStyle);
+          var minuteColor = loadExt('04')(getSetting("minuteColor", "white"), step);
+          localStorage.setItem("minuteColor", minuteColor);
+          output.minuteColor = loadExt('05')(minuteColor);
         }
 
         break;
       case 3: // middle
-          setting_mode = setting_mode == 'color' ? 'digitStyle' : 'color';
+        setting_mode = (setting_mode + 1) % 3;
+        output.settingMode = setting_mode;
         break;
     }
   }
 
   if (t == 't' && eventId == 2) { // common template + long down press
     // switch to settings template
-    setting_mode = 'color';
+    setting_mode = 0;
+    output.settingMode = setting_mode;
     t = 'v';
     unload("_cm");
     return;
@@ -105,8 +106,6 @@ function onEvent(input, output, eventId) {
 
 
 function getUserInterface() {
-  // var templateId = loadExt('02')(localStorage.getItem("digitStyle"));
-  // return { template: loadExt('07')(templateId) };
   systemEvent('template', t);
   return { template: t };
 }

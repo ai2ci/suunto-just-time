@@ -6,23 +6,37 @@
   "type": "feature",
   "usage": "workout",
   "modificationTime": 1773314833,
-  "in": [{ "name": "min", "source": "/Dev/Time/LocalTime/Min", "type": "subscribe" }],
   "out": [
-    { "name": "color", "shownName": "color" },
-    { "name": "digitStyle", "shownName": "digitStyle" },
-    { "name": "hour_10", "shownName": "hour_10" },
-    { "name": "hour_01", "shownName": "hour_01" },
-    { "name": "minute_10", "shownName": "minute_10" },
-    { "name": "minute_01", "shownName": "minute_01" }
+    { "name": "hourFont", "shownName": "hourFont" },
+    { "name": "minuteFont", "shownName": "minuteFont" },
+    { "name": "hourColor", "shownName": "hourColor" },
+    { "name": "minuteColor", "shownName": "minuteColor" },
+    { "name": "settingMode", "shownName": "settingMode" }
   ],
   "template": [{ "name": "t.html" }, { "name": "u.html" }, { "name": "v.html" }, { "name": "w.html" }],
   "settings": [
-    { "shownName": "Digit style", "path": "digitStyle", "type": "enum", "values": ["basic", "line", "weak", "weakline"] },
     {
-      "shownName": "Color",
-      "path": "color",
+      "shownName": "Font type",
+      "path": "fontType",
+      "type": "enum",
+      "values": ["hh-basic mm-basic", "hh-line mm-basic", "hh-basic mm-line", "hh-line mm-line"]
+    },
+    {
+      "shownName": "Hour color",
+      "path": "hourColor",
+      "type": "enum",
+      "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]
+    },
+    {
+      "shownName": "Minute color",
+      "path": "minuteColor",
       "type": "enum",
       "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]
     }
+  ],
+
+  "image": [
+    { "name": "aod-q.png", "type": "a64" },
+    { "name": "font-q.png", "type": "alpha2bit" }
   ]
 }

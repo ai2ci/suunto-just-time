@@ -1,5 +1,5 @@
 function (id, step) {
-  // getNextDigitStyle, step 1 = next, -1 = previous
-  var styles = ['basic', 'line', 'weak', 'weakline'];
-  return styles[(id + step + styles.length) % styles.length];
+  // getNextFontType, step 1 = next, -1 = previous
+  var types = ['hh-basic mm-basic', 'hh-line mm-basic', 'hh-basic mm-line', 'hh-line mm-line'];
+  return types[(id + step + types.length) % types.length];
 }

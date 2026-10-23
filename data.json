@@ -1,4 +1,5 @@
 {
-    "digitStyle": "basic",
-    "color": "red"
+    "fontType": "hh-basic mm-basic",
+    "hourColor": "red",
+    "minuteColor": "white"
 }

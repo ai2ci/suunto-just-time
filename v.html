@@ -1,129 +1,126 @@
-<uiView
-onLoad="
-var printDigit = function(d) {
-  return String(Math.floor(d));
-};
+<!-- WATCH FACE LOWPOWER : VERTICAL HERO -->
+<uiView id="wf-lowp" class="t-base" touchEnabled="false" triggerBacklight="false" crownEnabled="false"
+  onLoad="
+    var HOUR = '#hb1, #hb2, #hl1, #hl2';
+    var MIN = '#mb1, #mb2, #ml1, #ml2';
+    var hourFont = 0;
+    var minuteFont = 0;
+    var hourColor = '#FFFFFF';
+    var minuteColor = '#FFFFFF';
+    // Digits are shown only after time, fonts and colors are known, so they never appear in default look
+    var ready = {};
+    var pending = 5;
+    function toHex(c) {
+      return '#' + (c + 0x1000000).toString(16).slice(1);
+    }
+    function render() {
+      if (pending > 0) { return; }
+      setStyle('#hb1, #hb2', 'visibility', hourFont == 0 ? 'VISIBLE' : 'HIDDEN');
+      setStyle('#hl1, #hl2', 'visibility', hourFont == 1 ? 'VISIBLE' : 'HIDDEN');
+      setStyle('#mb1, #mb2', 'visibility', minuteFont == 0 ? 'VISIBLE' : 'HIDDEN');
+      setStyle('#ml1, #ml2', 'visibility', minuteFont == 1 ? 'VISIBLE' : 'HIDDEN');
+    }
+    function setReady(key) {
+      if (!ready[key]) {
+        ready[key] = true;
+        pending--;
+      }
+      render();
+    }
+    function customFontTime(t) {
+      var d = formatValue(t, 'time HHmmss');
+      var H = d[0], h = d[1];
+      // Modify hours if user is using 12-hour time format
+      if (!{SETTING_TIME_24H}) {
+        var h12 = String((+d.substr(0, 2) % 12) || 12); // Convert from 24-hour to 12-hour format
+        if (h12.length == 1) {
+          h12 = '0' + h12; // Ensure we have 2 digit hours
+        }
+        H = h12.charAt(0);
+        h = h12.charAt(1);
+      }
+      setStyle('#hb1, #hl1', 'left', (-100 * H) + '%');
+      setStyle('#hb2, #hl2', 'left', (-100 * h) + '%');
+      setStyle('#mb1, #ml1', 'left', (-100 * d[2]) + '%');
+      setStyle('#mb2, #ml2', 'left', (-100 * d[3]) + '%');
+      setReady('time');
+    }
+    var settingMode = 0; // 0 - font type, 1 - hour color, 2 - minute color
+    var interval;
+    function blink() {
+      if (pending > 0) { return; }
+      var target = settingMode == 0 ? HOUR + ', ' + MIN : (settingMode == 1 ? HOUR : MIN);
+      setStyle(target, 'color', '#000000');
+      setTimeout(function() {
+        setStyle(HOUR, 'color', hourColor);
+        setStyle(MIN, 'color', minuteColor);
+      }, 500);
+    }
+    var callEvent = function(eventId) {
+      $.put('/Zapp/{zapp_index}/Event', eventId, null, 'int32');
+      clearInterval(interval);
+    };
+    "
+  onActivate="
+    $.subscribe('/Zapp/{zapp_index}/Output/hourFont', function(f) {hourFont = f; setReady('hf');});
+    $.subscribe('/Zapp/{zapp_index}/Output/minuteFont', function(f) {minuteFont = f; setReady('mf');});
+    $.subscribe('/Zapp/{zapp_index}/Output/hourColor', function(c) {
+      hourColor = toHex(c);
+      setStyle(HOUR, 'color', hourColor);
+      setReady('hc');
+    });
+    $.subscribe('/Zapp/{zapp_index}/Output/minuteColor', function(c) {
+      minuteColor = toHex(c);
+      setStyle(MIN, 'color', minuteColor);
+      setReady('mc');
+    });
+    // Fallback so the digits never stay hidden if some value does not arrive
+    setTimeout(function() {pending = 0; render();}, 1000);
+    $.get('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);}); // Avoid initial blinking
+    $.subscribe('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);});
+    $.subscribe('/Zapp/{zapp_index}/Output/settingMode', function(m) {settingMode = m;});
+    interval = setInterval(blink, 1000);
+    "
+  onDeactivate="
+    clearInterval(interval);
+    ">
 
-var mode = 'hour';
-var color = '';
-var white = '#FFFFFF';
-var black = '#000000';
-var weak = '#AAAAAA';
-var digitStyle = 0;
-var coreColors = [white, black, weak, black];
-var outlineColors = [black, white, black, weak];
+  <!-- import shared wf helper scripts -->
+  <!-- <import src="#c-helper-lowp" /> -->
 
-var applyDigitStyle = function(ds) {
-  setStyle('#m_10_core', 'color', coreColors[ds]);
-  setStyle('#m_01_core', 'color', coreColors[ds]);
-  setStyle('#minutes', 'color', outlineColors[ds]);
-};
+  <div id="aodcontent" style="width:100%;height:100%;">
+    <!-- AM/PM 12H -->
+    <:if test="!{SETTING_TIME_24H}">
+      <div class="f-t-m" style="left:366px;width:55px;top:244px;text-align:center;">
+        <eval input="/Dev/Time/LocalTime/Min" outputFormat="time ?tt" />
+      </div>
+    </:if>
 
-$.subscribe('/Zapp/{zapp_index}/Output/color', function (c) {
-  color = '#' + (c + 0x1000000).toString(16).slice(1);
-});
-
-$.subscribe('/Zapp/{zapp_index}/Output/digitStyle', function (ds) {
-  digitStyle = ds;
-});
-
-$.subscribe('/Dev/Time/LocalTime/Min', function (sec) {
-  var min = parseInt((sec % (24 * 3600)) / 60, 10);
-  $.put('/Zapp/{zapp_index}/Event', 1000 + min , null, 'int32');
-});
-
-var interval = setInterval(function() {
-  if (mode == 'hour') {
-    setStyle('#d', 'color', black);
-  } else {
-    setStyle('#m_10_core', 'color', black);
-    setStyle('#m_01_core', 'color', black);
-    setStyle('#minutes', 'color', black);
-  }
-
-  setTimeout(function() {
-    setStyle('#d', 'color', color);
-    applyDigitStyle(digitStyle);
-  }, 500);
-}, 1000);
-
-var callEvent = function(eventId) {
-  $.put('/Zapp/{zapp_index}/Event', eventId, null, 'int32');
-  clearInterval(interval);
-};
-"
->
-  <div
-    class="sp-d-xxl sp-vertical-center"
-    id="d"
-    style="position: absolute; top: 0; left: 0; height: 100%; width: 50%;color:black"
-  >
-    <div style="position:absolute;left:20%;top:calc(50% - 55%e);width:80%;height:40%;" id="hd0">
-      <eval input="/Zapp/{zapp_index}/Output/hour_10" outputFormat="script x => printDigit(x)" />
+    <!-- MAIN TIME: 4 cells of 80x110 px on the 466 px display, centered by percentage -->
+    <!-- basic font = font-q.png, line font = aod-q.png; per digit only the selected font is visible -->
+    <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:68.67%;height:23.6%;">
+      <div style="left:0%;top:0%;width:25%;height:100%;"><img id="hb1" style="visibility:hidden;" class="t-base" src="font-q.png" /><img id="hl1" style="visibility:hidden;" class="t-base" src="aod-q.png" /></div>
+      <div style="left:25%;top:0%;width:25%;height:100%;"><img id="hb2" style="visibility:hidden;" class="t-base" src="font-q.png" /><img id="hl2" style="visibility:hidden;" class="t-base" src="aod-q.png" /></div>
+      <div style="left:50%;top:0%;width:25%;height:100%;"><img id="mb1" style="visibility:hidden;" class="t-base" src="font-q.png" /><img id="ml1" style="visibility:hidden;" class="t-base" src="aod-q.png" /></div>
+      <div style="left:75%;top:0%;width:25%;height:100%;"><img id="mb2" style="visibility:hidden;" class="t-base" src="font-q.png" /><img id="ml2" style="visibility:hidden;" class="t-base" src="aod-q.png" /></div>
     </div>
 
-    <div style="left:60%;top:calc(50% - 55%e);width:40%;height:40%;" id="hd1">
-      <eval input="/Zapp/{zapp_index}/Output/hour_01" outputFormat="script x => printDigit(x)" />
-    </div>
-  </div>
-
-  <div
-    style="position:absolute;top:0;left:50%;height:100%;width:50%;color:black;"
-    id="minutes"
-    class="sp-d-xxl sp-vertical-center"
-  >
-    <div style="position:absolute;left:6%;top:30%;width:40%;height:40%;" id="m_10">
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e - 1px);left:-1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
-      </div>
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e + 1px);left:1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
-      </div>
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e - 1px);left:1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
-      </div>
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e + 1px);left:-1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
-      </div>
-
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_10_core">
-        <eval input="/Zapp/{zapp_index}/Output/minute_10" outputFormat="script x => printDigit(x)" />
-      </div>
-    </div>
-    
-    <div style="position:absolute;left:46%;top:30%;width:40%;height:40%;" id="m_01">
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e - 1px);left:-1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
-      </div>
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e + 1px);left:1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
-      </div>
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e - 1px);left:1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
-      </div>
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e + 1px);left:-1px;">
-        <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
-      </div>
-
-      <div style="position:absolute;height:100%;top:calc(50% - 55%e);left:0;" id="m_01_core">
-        <eval input="/Zapp/{zapp_index}/Output/minute_01" outputFormat="script x => printDigit(x)" />
-      </div>
-    </div>
+    <!-- STATUS-ICONS: SYNC, CHARGING, STORM ALARM & DND -->
+    <:statusIcons aod="true" style="#positionStyle{top:185px;left:370px;}" />
   </div>
 
   <userInput>
-    <pushButton name="down" 
+    <pushButton name="down"
       onClick="$.put('/Zapp/{zapp_index}/Event', 1, null, 'int32');"
       onLongPressStart="callEvent(2);"
     />
-    <pushButton name="next" 
-      onClick="$.put('/Zapp/{zapp_index}/Event', 3, null, 'int32'); mode = mode == 'hour' ? 'minute' : 'hour'"
+    <pushButton name="next"
+      onClick="$.put('/Zapp/{zapp_index}/Event', 3, null, 'int32');"
       onLongPressStart="callEvent(4);"
     />
-    <pushButton name="up" 
+    <pushButton name="up"
       onClick="$.put('/Zapp/{zapp_index}/Event', 5, null, 'int32');"
       onLongPressStart="callEvent(6);"
     />
   </userInput>
-
 </uiView>
