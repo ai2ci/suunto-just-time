@@ -1,5 +1,5 @@
 <!-- WATCH FACE LOWPOWER : VERTICAL HERO -->
-<uiView id="wf-lowp" class="t-base" touchEnabled="false" triggerBacklight="false" crownEnabled="false"
+<uiView
   onLoad="
     var HOUR = '#hb1, #hb2, #hl1, #hl2';
     var MIN = '#mb1, #mb2, #ml1, #ml2';
@@ -13,12 +13,28 @@
     function toHex(c) {
       return '#' + (c + 0x1000000).toString(16).slice(1);
     }
+    // The blinking group is painted black in the off phase (settingMode 0 = both, 1 = hours, 2 = minutes)
+    var blinkOn = true;
+    function paint() {
+      var hc = hourColor;
+      var mc = minuteColor;
+      if (blinkOn) {
+        if (settingMode != 2) { hc = '#000000'; }
+        if (settingMode != 1) { mc = '#000000'; }
+      }
+      setStyle(HOUR, 'color', hc);
+      setStyle(MIN, 'color', mc);
+    }
     function render() {
       if (pending > 0) { return; }
       setStyle('#hb1, #hb2', 'visibility', hourFont == 0 ? 'VISIBLE' : 'HIDDEN');
       setStyle('#hl1, #hl2', 'visibility', hourFont == 1 ? 'VISIBLE' : 'HIDDEN');
       setStyle('#mb1, #mb2', 'visibility', minuteFont == 0 ? 'VISIBLE' : 'HIDDEN');
       setStyle('#ml1, #ml2', 'visibility', minuteFont == 1 ? 'VISIBLE' : 'HIDDEN');
+      if (!shown) {
+        shown = true;
+        startBlink(); // the blinking group stays dark for the first 500 ms
+      }
     }
     function setReady(key) {
       if (!ready[key]) {
@@ -45,33 +61,74 @@
       setStyle('#mb2, #ml2', 'left', (-100 * d[3]) + '%');
       setReady('time');
     }
+    // Long press ring: arc on a canvas, drawn clockwise from 12 o'clock. It fills in RING_TICKS steps of 100 ms
+    // from the long press start (0.6 s) so it is full after 3 s, then the event is sent from the script
+    // (onLongPressFull is not reliable). Release before that only stops the ring.
+    var RING_TICKS = 24;
+    var ringStep = 0;
+    var ringEvent = 0;
+    var ringTimer;
+    function ringBuild(ctx) {
+      if (ringStep == 0) { return; }
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(ctx.width / 2, ctx.height / 2, ctx.width / 2 - 14, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * ringStep / RING_TICKS);
+      ctx.stroke();
+    }
+    function ringStart(eventId) {
+      ringEvent = eventId;
+      ringStep = 0;
+      clearInterval(ringTimer);
+      ringTimer = setInterval(function() {
+        ringStep++;
+        control('#ring', 'REFRESH');
+        if (ringStep == RING_TICKS) {
+          clearInterval(ringTimer);
+          ringAction(ringEvent);
+        }
+      }, 100);
+    }
+    function ringStop() {
+      clearInterval(ringTimer);
+      ringStep = 0;
+      control('#ring', 'REFRESH');
+    }
     var settingMode = 0; // 0 - font type, 1 - hour color, 2 - minute color
     var interval;
+    var shown = false;
     function blink() {
-      if (pending > 0) { return; }
-      var target = settingMode == 0 ? HOUR + ', ' + MIN : (settingMode == 1 ? HOUR : MIN);
-      setStyle(target, 'color', '#000000');
-      setTimeout(function() {
-        setStyle(HOUR, 'color', hourColor);
-        setStyle(MIN, 'color', minuteColor);
-      }, 500);
+      blinkOn = !blinkOn;
+      paint();
     }
-    var callEvent = function(eventId) {
-      $.put('/Zapp/{zapp_index}/Event', eventId, null, 'int32');
+    function startBlink() {
       clearInterval(interval);
-    };
+      blinkOn = true;
+      paint();
+      interval = setInterval(blink, 500);
+    }
+    function stopBlink() {
+      clearInterval(interval);
+      blinkOn = false;
+      paint();
+    }
+    function ringAction(eventId) {
+      clearInterval(interval);
+      $.put('/Zapp/{zapp_index}/Event', eventId, null, 'int32');
+    }
     "
   onActivate="
     $.subscribe('/Zapp/{zapp_index}/Output/hourFont', function(f) {hourFont = f; setReady('hf');});
     $.subscribe('/Zapp/{zapp_index}/Output/minuteFont', function(f) {minuteFont = f; setReady('mf');});
     $.subscribe('/Zapp/{zapp_index}/Output/hourColor', function(c) {
       hourColor = toHex(c);
-      setStyle(HOUR, 'color', hourColor);
+      paint();
       setReady('hc');
     });
     $.subscribe('/Zapp/{zapp_index}/Output/minuteColor', function(c) {
       minuteColor = toHex(c);
-      setStyle(MIN, 'color', minuteColor);
+      paint();
       setReady('mc');
     });
     // Fallback so the digits never stay hidden if some value does not arrive
@@ -79,19 +136,15 @@
     $.get('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);}); // Avoid initial blinking
     $.subscribe('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);});
     $.subscribe('/Zapp/{zapp_index}/Output/settingMode', function(m) {settingMode = m;});
-    interval = setInterval(blink, 1000);
     "
   onDeactivate="
     clearInterval(interval);
     ">
 
-  <!-- import shared wf helper scripts -->
-  <!-- <import src="#c-helper-lowp" /> -->
-
   <div id="aodcontent" style="width:100%;height:100%;">
-    <!-- AM/PM 12H -->
+    <!-- AM/PM 12H: small text right of the minutes, in the lower half of the digit row -->
     <:if test="!{SETTING_TIME_24H}">
-      <div class="f-t-m" style="left:366px;width:55px;top:244px;text-align:center;">
+      <div class="f-t-s" style="left:calc(90.4% - 50%e);top:calc(56% - 50%e);width:12%;text-align:center;">
         <eval input="/Dev/Time/LocalTime/Min" outputFormat="time ?tt" />
       </div>
     </:if>
@@ -105,22 +158,31 @@
       <div style="left:75%;top:0%;width:25%;height:100%;"><img id="mb2" style="visibility:hidden;" class="t-base" src="font-q.png" /><img id="ml2" style="visibility:hidden;" class="t-base" src="aod-q.png" /></div>
     </div>
 
-    <!-- STATUS-ICONS: SYNC, CHARGING, STORM ALARM & DND -->
-    <:statusIcons aod="true" style="#positionStyle{top:185px;left:370px;}" />
+    <!-- LONG PRESS RING: canvas over the whole display, drawn by ringBuild -->
+    <object id="ring" type="canvas" build="ctx => ringBuild(ctx)" style="position:absolute; left:0%; top:0%; width:100%; height:100%;" />
   </div>
 
   <userInput>
     <pushButton name="down"
       onClick="$.put('/Zapp/{zapp_index}/Event', 1, null, 'int32');"
-      onLongPressStart="callEvent(2);"
+      longPressDuration="3"
+      onLongPressStart="stopBlink(); ringStart(2);"
+      onLongPressCancel="ringStop(); startBlink();"
+      onLongPress="ringStop();"
     />
     <pushButton name="next"
       onClick="$.put('/Zapp/{zapp_index}/Event', 3, null, 'int32');"
-      onLongPressStart="callEvent(4);"
+      longPressDuration="3"
+      onLongPressStart="stopBlink(); ringStart(4);"
+      onLongPressCancel="ringStop(); startBlink();"
+      onLongPress="ringStop();"
     />
     <pushButton name="up"
       onClick="$.put('/Zapp/{zapp_index}/Event', 5, null, 'int32');"
-      onLongPressStart="callEvent(6);"
+      longPressDuration="3"
+      onLongPressStart="stopBlink(); ringStart(6);"
+      onLongPressCancel="ringStop(); startBlink();"
+      onLongPress="ringStop();"
     />
   </userInput>
 </uiView>

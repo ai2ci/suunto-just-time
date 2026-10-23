@@ -55,18 +55,27 @@ při přidání/změně ext souboru ho aktualizuj.
   sprite pásy číslic (`left: -100*číslice %`). `main.js` čas nezpracovává.
 - **Číslice**: každá pozice (hodina 1/2, minuta 1/2) má dva `<img>` (`hb1`/`hl1`, `hb2`/`hl2`, `mb1`/`ml1`,
   `mb2`/`ml2` — `b` = basic, `l` = line), viditelný je jen ten ve zvoleném fontu. Čtyři buňky 80×110 px
-  jsou vycentrované v procentech (`calc(50% - 50%e)`), ne v pixelech.
+  jsou vycentrované v procentech (`calc(50% - 50%e)`), ne v pixelech. Vpravo od minut je v dolní polovině
+  řádku číslic malý text AM/PM (`f-t-s`, jen při 12hodinovém formátu hodinek).
 - **Bez bliknutí**: číslice jsou zprvu `visibility:hidden` a odkryjí se až po příchodu času, obou fontů
   a obou barev (`pending`/`setReady` v šabloně); po 1 s se odkryjí i tak (záloha).
 - **Kódy eventů** (`$.put('/Zapp/{zapp_index}/Event', id, null, 'int32')`):
   - `1` down click, `3` next (middle) click, `5` up click
   - `2` / `4` / `6` long press down / next / up
+- **Dlouhý stisk (`t`: dolní tlačítko, `v`: všechna tři)**: `onLongPressStart` (po 0,6 s) spustí kroužek
+  (`<object type="canvas">`, `ringStart(eventId)`), který se po směru hodinových ručiček plní od 12 hodin
+  24 kroky po 100 ms, takže je plný po 3 s od stisku. Událost se pak odešle ze skriptu (`ringAction`);
+  `onLongPressFull` se nepoužívá, protože se nevolá spolehlivě. `onLongPressCancel` a `onLongPress` volají
+  jen `ringStop()`.
 - **Nastavení (`v`)**: tři nastavení, mezi kterými přepíná middle (`setting_mode` 0 → 1 → 2 → 0):
   - `0` `fontType` — `hh-basic mm-basic`, `hh-line mm-basic`, `hh-basic mm-line`, `hh-line mm-line` (bliká vše),
   - `1` `hourColor` (blikají hodinové číslice),
   - `2` `minuteColor` (blikají minutové číslice).
 
   Horní tlačítko (`5`) posouvá hodnotu dopředu, dolní (`1`) dozadu, libovolný long press se vrací do `t`.
+  Blikání: jediný interval 500 ms přepíná `blinkOn` a `paint()` vykreslí blikající skupinu černě. Po
+  zobrazení číslic začíná zhasnutím (prvních 500 ms nic), při dlouhém stisku se blikání zastaví
+  (`stopBlink`) a při zrušení stisku znovu spustí (`startBlink`).
   Hodnoty se ukládají do `localStorage` (klíče `fontType`, `hourColor`, `minuteColor` — shodné s `path`
   v `manifest.json` → `settings` a s klíči v `data.json`).
 - **Výstupy do šablon**: `output.hourFont`, `output.minuteFont` (0 = basic, 1 = line, odvozeno z `fontType`
