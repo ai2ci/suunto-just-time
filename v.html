@@ -62,9 +62,9 @@
       setReady('time');
     }
     // Long press ring: arc on a canvas, drawn clockwise from 12 o'clock. It fills in RING_TICKS steps of 100 ms
-    // from the long press start (0.6 s) so it is full after 3 s, then the event is sent from the script
+    // from the long press start (0.6 s) so it is full after 2.4 s, then the event is sent from the script
     // (onLongPressFull is not reliable). Release before that only stops the ring.
-    var RING_TICKS = 24;
+    var RING_TICKS = 18;
     var ringStep = 0;
     var ringEvent = 0;
     var ringTimer;
@@ -165,21 +165,21 @@
   <userInput>
     <pushButton name="down"
       onClick="$.put('/Zapp/{zapp_index}/Event', 1, null, 'int32');"
-      longPressDuration="3"
+      longPressDuration="2.4"
       onLongPressStart="stopBlink(); ringStart(2);"
       onLongPressCancel="ringStop(); startBlink();"
       onLongPress="ringStop();"
     />
     <pushButton name="next"
       onClick="$.put('/Zapp/{zapp_index}/Event', 3, null, 'int32');"
-      longPressDuration="3"
+      longPressDuration="2.4"
       onLongPressStart="stopBlink(); ringStart(4);"
       onLongPressCancel="ringStop(); startBlink();"
       onLongPress="ringStop();"
     />
     <pushButton name="up"
       onClick="$.put('/Zapp/{zapp_index}/Event', 5, null, 'int32');"
-      longPressDuration="3"
+      longPressDuration="2.4"
       onLongPressStart="stopBlink(); ringStart(6);"
       onLongPressCancel="ringStop(); startBlink();"
       onLongPress="ringStop();"

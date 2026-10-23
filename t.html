@@ -50,9 +50,9 @@
       setReady('time');
     }
     // Long press ring: arc on a canvas, drawn clockwise from 12 o'clock. It fills in RING_TICKS steps of 100 ms
-    // from the long press start (0.6 s) so it is full after 3 s, then the event is sent from the script
+    // from the long press start (0.6 s) so it is full after 2.4 s, then the event is sent from the script
     // (onLongPressFull is not reliable). Release before that only stops the ring.
-    var RING_TICKS = 24;
+    var RING_TICKS = 18;
     var ringStep = 0;
     var ringEvent = 0;
     var ringTimer;
@@ -128,7 +128,7 @@
   </div>
 
   <userInput>
-    <pushButton name="down" longPressDuration="3"
+    <pushButton name="down" longPressDuration="2.4"
       onLongPressStart="ringStart(2);"
       onLongPressCancel="ringStop();"
       onLongPress="ringStop();"

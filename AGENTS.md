@@ -64,7 +64,7 @@ při přidání/změně ext souboru ho aktualizuj.
   - `2` / `4` / `6` long press down / next / up
 - **Dlouhý stisk (`t`: dolní tlačítko, `v`: všechna tři)**: `onLongPressStart` (po 0,6 s) spustí kroužek
   (`<object type="canvas">`, `ringStart(eventId)`), který se po směru hodinových ručiček plní od 12 hodin
-  24 kroky po 100 ms, takže je plný po 3 s od stisku. Událost se pak odešle ze skriptu (`ringAction`);
+  18 kroky po 100 ms (`RING_TICKS`), takže je plný po 2,4 s od stisku (`longPressDuration="2.4"`). Událost se pak odešle ze skriptu (`ringAction`);
   `onLongPressFull` se nepoužívá, protože se nevolá spolehlivě. `onLongPressCancel` a `onLongPress` volají
   jen `ringStop()`.
 - **Nastavení (`v`)**: tři nastavení, mezi kterými přepíná middle (`setting_mode` 0 → 1 → 2 → 0):

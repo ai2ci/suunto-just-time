@@ -48,9 +48,9 @@ function evaluate(input, output) {}
 
 function onLoad(input, output) {
   // load defaults from localStorage
-  setFontOutputs(output, getSetting("fontType", "hh-basic mm-basic"));
-  output.hourColor = loadExt('05')(getSetting("hourColor", "red"));
-  output.minuteColor = loadExt('05')(getSetting("minuteColor", "white"));
+  setFontOutputs(output, getSetting("fontType", "hh-line mm-line"));
+  output.hourColor = loadExt('05')(getSetting("hourColor", "white"));
+  output.minuteColor = loadExt('05')(getSetting("minuteColor", "grey"));
   output.settingMode = setting_mode;
 }
 
@@ -72,15 +72,15 @@ function onEvent(input, output, eventId) {
       case 1: // Down - previous value
         var step = eventId == 5 ? 1 : -1;
         if (setting_mode == 0) {
-          var fontType = loadExt('01')(loadExt('02')(getSetting("fontType", "hh-basic mm-basic")), step);
+          var fontType = loadExt('01')(loadExt('02')(getSetting("fontType", "hh-line mm-line")), step);
           localStorage.setItem("fontType", fontType);
           setFontOutputs(output, fontType);
         } else if (setting_mode == 1) {
-          var hourColor = loadExt('04')(getSetting("hourColor", "red"), step);
+          var hourColor = loadExt('04')(getSetting("hourColor", "white"), step);
           localStorage.setItem("hourColor", hourColor);
           output.hourColor = loadExt('05')(hourColor);
         } else {
-          var minuteColor = loadExt('04')(getSetting("minuteColor", "white"), step);
+          var minuteColor = loadExt('04')(getSetting("minuteColor", "grey"), step);
           localStorage.setItem("minuteColor", minuteColor);
           output.minuteColor = loadExt('05')(minuteColor);
         }
