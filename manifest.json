@@ -14,9 +14,9 @@
     { "name": "settingMode", "shownName": "settingMode" }
   ],
   "template": [
-    { "name": "t.html", "displays": ["q", "o", "n"] },
-    { "name": "u.html", "displays": ["q", "o", "n"] },
-    { "name": "v.html", "displays": ["q", "o", "n"] }
+    { "name": "t.html", "displays": ["q", "o", "n", "s", "m", "l"] },
+    { "name": "u.html", "displays": ["q", "o", "n", "s", "m", "l"] },
+    { "name": "v.html", "displays": ["q", "o", "n", "s", "m", "l"] }
   ],
   "settings": [
     {
@@ -40,11 +40,7 @@
   ],
 
   "image": [
-    { "name": "solid-q.png", "type": "alpha2bit" },
-    { "name": "outline-q.png", "type": "a64" },
-    { "name": "solid-o.png", "type": "alpha2bit" },
-    { "name": "outline-o.png", "type": "a64" },
-    { "name": "solid-n.png", "type": "alpha2bit" },
-    { "name": "outline-n.png", "type": "a64" }
+    { "name": "solid.png", "type": "alpha2bit" },
+    { "name": "outl.png", "type": "a64" }
   ]
 }

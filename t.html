@@ -113,35 +113,51 @@
     <!-- AM/PM 12H: small text right of the minutes, in the lower half of the digit row. Centered (92%) in the free
          space right of the digits (digit group ends at 83.3-84.3% on q, o and n), 13% wide so it never touches them -->
     <:if test="!{SETTING_TIME_24H}">
-      <div class="f-t-s" style="left:calc(92% - 50%e);top:calc(56% - 50%e);width:13%;text-align:center;">
+      <div class="sp-t-s" style="left:calc(92% - 50%e);top:calc(56% - 50%e);width:13%;text-align:center;">
         <eval input="/Dev/Time/LocalTime/Min" outputFormat="time ?tt" />
       </div>
     </:if>
 
-    <!-- MAIN TIME: 4 cells per display (q 80x110 px, o 48x66 px, n 40x56 px), centered by percentage -->
-    <!-- solid = solid-<display>.png, outline = outline-<display>.png; per digit only the selected font type is visible -->
+    <!-- MAIN TIME: 4 cells per display (q 80x110 px, o 48x66 px, n 40x56 px, s 36x50 px, l 54x74 px; m uses n), centered by percentage -->
+    <!-- solid = solid.png, outline = outl.png, one row per display (top offset q 0, o -110px, n -176px); per digit only the selected font type is visible -->
     <:if test="('{{DISPLAY_ID}}' == 'q')">
-      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:68.670%;height:23.605%;">
-        <div style="left:0%;top:0%;width:25%;height:100%;"><img id="hs1" style="visibility:hidden;" class="t-base" src="solid-q.png" /><img id="ho1" style="visibility:hidden;" class="t-base" src="outline-q.png" /></div>
-        <div style="left:25%;top:0%;width:25%;height:100%;"><img id="hs2" style="visibility:hidden;" class="t-base" src="solid-q.png" /><img id="ho2" style="visibility:hidden;" class="t-base" src="outline-q.png" /></div>
-        <div style="left:50%;top:0%;width:25%;height:100%;"><img id="ms1" style="visibility:hidden;" class="t-base" src="solid-q.png" /><img id="mo1" style="visibility:hidden;" class="t-base" src="outline-q.png" /></div>
-        <div style="left:75%;top:0%;width:25%;height:100%;"><img id="ms2" style="visibility:hidden;" class="t-base" src="solid-q.png" /><img id="mo2" style="visibility:hidden;" class="t-base" src="outline-q.png" /></div>
+      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:320px;height:110px;">
+        <div style="left:0%;top:0%;width:80px;height:110px;overflow:hidden;"><img id="hs1" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho1" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:25%;top:0%;width:80px;height:110px;overflow:hidden;"><img id="hs2" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho2" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:50%;top:0%;width:80px;height:110px;overflow:hidden;"><img id="ms1" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo1" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:75%;top:0%;width:80px;height:110px;overflow:hidden;"><img id="ms2" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo2" style="position:absolute; top:0px; visibility:hidden;" class="t-base" src="outl.png" /></div>
       </div>
     </:if>
     <:elseif test="('{{DISPLAY_ID}}' == 'o')">
-      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:68.571%;height:23.571%;">
-        <div style="left:0%;top:0%;width:25%;height:100%;"><img id="hs1" style="visibility:hidden;" class="t-base" src="solid-o.png" /><img id="ho1" style="visibility:hidden;" class="t-base" src="outline-o.png" /></div>
-        <div style="left:25%;top:0%;width:25%;height:100%;"><img id="hs2" style="visibility:hidden;" class="t-base" src="solid-o.png" /><img id="ho2" style="visibility:hidden;" class="t-base" src="outline-o.png" /></div>
-        <div style="left:50%;top:0%;width:25%;height:100%;"><img id="ms1" style="visibility:hidden;" class="t-base" src="solid-o.png" /><img id="mo1" style="visibility:hidden;" class="t-base" src="outline-o.png" /></div>
-        <div style="left:75%;top:0%;width:25%;height:100%;"><img id="ms2" style="visibility:hidden;" class="t-base" src="solid-o.png" /><img id="mo2" style="visibility:hidden;" class="t-base" src="outline-o.png" /></div>
+      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:192px;height:66px;">
+        <div style="left:0%;top:0%;width:48px;height:66px;overflow:hidden;"><img id="hs1" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho1" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:25%;top:0%;width:48px;height:66px;overflow:hidden;"><img id="hs2" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho2" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:50%;top:0%;width:48px;height:66px;overflow:hidden;"><img id="ms1" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo1" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:75%;top:0%;width:48px;height:66px;overflow:hidden;"><img id="ms2" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo2" style="position:absolute; top:-110px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+      </div>
+    </:elseif>
+    <:elseif test="('{{DISPLAY_ID}}' == 's')">
+      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:144px;height:50px;">
+        <div style="left:0%;top:0%;width:36px;height:50px;overflow:hidden;"><img id="hs1" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho1" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:25%;top:0%;width:36px;height:50px;overflow:hidden;"><img id="hs2" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho2" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:50%;top:0%;width:36px;height:50px;overflow:hidden;"><img id="ms1" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo1" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:75%;top:0%;width:36px;height:50px;overflow:hidden;"><img id="ms2" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo2" style="position:absolute; top:-232pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+      </div>
+    </:elseif>
+    <:elseif test="('{{DISPLAY_ID}}' == 'l')">
+      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:216px;height:74px;">
+        <div style="left:0%;top:0%;width:54px;height:74px;overflow:hidden;"><img id="hs1" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho1" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:25%;top:0%;width:54px;height:74px;overflow:hidden;"><img id="hs2" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho2" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:50%;top:0%;width:54px;height:74px;overflow:hidden;"><img id="ms1" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo1" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:75%;top:0%;width:54px;height:74px;overflow:hidden;"><img id="ms2" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo2" style="position:absolute; top:-282pxpx; visibility:hidden;" class="t-base" src="outl.png" /></div>
       </div>
     </:elseif>
     <:else>
-      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:66.667%;height:23.333%;">
-        <div style="left:0%;top:0%;width:25%;height:100%;"><img id="hs1" style="visibility:hidden;" class="t-base" src="solid-n.png" /><img id="ho1" style="visibility:hidden;" class="t-base" src="outline-n.png" /></div>
-        <div style="left:25%;top:0%;width:25%;height:100%;"><img id="hs2" style="visibility:hidden;" class="t-base" src="solid-n.png" /><img id="ho2" style="visibility:hidden;" class="t-base" src="outline-n.png" /></div>
-        <div style="left:50%;top:0%;width:25%;height:100%;"><img id="ms1" style="visibility:hidden;" class="t-base" src="solid-n.png" /><img id="mo1" style="visibility:hidden;" class="t-base" src="outline-n.png" /></div>
-        <div style="left:75%;top:0%;width:25%;height:100%;"><img id="ms2" style="visibility:hidden;" class="t-base" src="solid-n.png" /><img id="mo2" style="visibility:hidden;" class="t-base" src="outline-n.png" /></div>
+      <div style="left:calc(50% - 50%e);top:calc(50% - 50%e);width:160px;height:56px;">
+        <div style="left:0%;top:0%;width:40px;height:56px;overflow:hidden;"><img id="hs1" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho1" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:25%;top:0%;width:40px;height:56px;overflow:hidden;"><img id="hs2" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="solid.png" /><img id="ho2" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:50%;top:0%;width:40px;height:56px;overflow:hidden;"><img id="ms1" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo1" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="outl.png" /></div>
+        <div style="left:75%;top:0%;width:40px;height:56px;overflow:hidden;"><img id="ms2" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="solid.png" /><img id="mo2" style="position:absolute; top:-176px; visibility:hidden;" class="t-base" src="outl.png" /></div>
       </div>
     </:else>
 

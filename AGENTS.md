@@ -5,7 +5,7 @@ Instrukce pro AI agenty (Claude Code, Codex, Copilot…) pracující v tomto rep
 ## Co to je
 
 **SuuntoPlus sports app „Just time“** pro hodinky Suunto (UI2: display `q` 466×466 px — Race, Race S,
-Race 2, Vertical 2, Ocean; `o` 280×280 px — Vertical; `n` 240×240 px — 9 Peak Pro). Během aktivity zobrazuje jen velký čas (HH:MM) jako ciferník
+Race 2, Vertical 2, Ocean; `o` 280×280 px — Vertical; `n` 240×240 px — 9 Peak Pro; UI1: `s` 218×218 px — Suunto 3, 5, 5 Peak; `m` 240×240 px — 9 Peak; `l` 320×300 px — 9, 9 Baro). Během aktivity zobrazuje jen velký čas (HH:MM) jako ciferník
 vykreslený z obrázků (sprite pásy číslic, font Sarabun Bold). Hodinové a minutové číslice mají každé
 svůj font (`solid` = plné číslice `solid-<display>.png`, `outline` = obrysové `outline-<display>.png`) a svou barvu. Nastavení jde měnit přímo na hodinkách
 tlačítky nebo přes `settings` v aplikaci Suunto.
@@ -23,7 +23,7 @@ VS Code rozšíření **SuuntoPlus Editor** (`~/.vscode/extensions/suunto.suunto
 | `t.html` | Hlavní šablona během aktivity; dlouhý stisk **down** → nastavení |
 | `u.html` | Stejný ciferník bez `<userInput>` — používá se během pauzy (tlačítka patří systému) |
 | `v.html` | Režim nastavení (blikání vybrané části, změna fontu / barev) |
-| `solid-{q,o,n}.png`, `outline-{q,o,n}.png` | Sprite pásy číslic 0–9 pro jednotlivé displeje (bílé na průhledném, barvu dává CSS `color`): `q` buňka 80×110 px (pás 800×110), `o` 48×66 px (480×66), `n` 40×56 px (400×56). `solid-*` (plné), `outline-*` (obrys). Reference povoluje max. 2 obrázky na app — při buildu pro jeden displej se použijí dva |
+| `solid.png`, `outl.png` | Sheety pásů číslic 0–9 pro všechny displeje, jeden řádek na displej shora dolů: `q` (y 0, buňka 80×110 px, pás 800×110), `o` (y 110, 48×66 px), `n` (y 176, 40×56 px), `s` (y 232, 36×50 px), `l` (y 282, 54×74 px). `m` má stejnou velikost jako `n` a používá jeho řádek. Celý sheet 800×356 px. Názvy musí mít max. 10 znaků (limit editoru). Bílé na průhledném, barvu dává CSS `color`. `solid.png` je `alpha2bit`, `outl.png` je `a64` (typ je na celý obrázek). Reference povoluje max. 2 obrázky na app, takže jsou jen dva |
 | `ext01.js`, `ext02.js`, `ext04.js`, `ext05.js` | Externí funkce načítané z flash přes `evalFile` (šetří stack/heap) |
 | `data.json` | Výchozí hodnoty nastavení (`fontType`, `hourColor`, `minuteColor`) |
 | `~/.vscode/extensions/suunto.suuntoplus-editor-1.42.0/developer-doc/reference.html` | Oficiální SuuntoPlus reference dodaná s rozšířením — **primární zdroj pravdy o API** (cesta platí pro verzi 1.42.0, po aktualizaci rozšíření ji ověř) |
@@ -35,11 +35,13 @@ VS Code rozšíření **SuuntoPlus Editor** (`~/.vscode/extensions/suunto.suunto
 Pásy se vyrábějí lokálním skriptem (není v repozitáři, je v `private/`) z fontu Sarabun Bold
 (`private/font-strip/fonts/Sarabun-Bold.ttf`, licence OFL). Z adresáře `private/font-strip`:
 
-    node generate.mjs fonts/Sarabun-Bold.ttf --display all --prefix solid --style fill --out ../..
-    node generate.mjs fonts/Sarabun-Bold.ttf --display q --prefix outline --style outline --stroke 3 --out ../..
-    node generate.mjs fonts/Sarabun-Bold.ttf --display o,n --prefix outline --style outline --stroke 2 --out ../..
+    node generate.mjs fonts/Sarabun-Bold.ttf --display all --prefix solid --style fill --sheet --out ../..
+    node generate.mjs fonts/Sarabun-Bold.ttf --display all --prefix outl --style outline --stroke 3,2,2,2,3 --sheet --out ../..
 
-Při změně velikosti buňky v `generate.mjs` uprav i rozměry skupiny číslic v šablonách (viz níže).
+`--stroke` má jednu hodnotu nebo pět (q, o, n, s, l). Výpis generátoru ukáže `top` každého řádku; ten je v šabloně
+(`top:-110px` pro o, `top:-176px` pro n, `top:-232px` pro s, `top:-282px` pro l, q je 0).
+
+Při změně velikosti buňky v `generate.mjs` uprav i rozměry skupiny číslic a `top` řádků v šablonách (viz níže).
 
 ### Externí funkce (`loadExt('NN')`)
 
@@ -64,7 +66,8 @@ při přidání/změně ext souboru ho aktualizuj.
   `ms2`/`mo2` — `s` = solid, `o` = outline), viditelný je jen ten ve zvoleném fontu. Čtyři buňky jsou
   vycentrované v procentech (`calc(50% - 50%e)`), ne v pixelech. Rozměry se liší podle displeje, proto
   jsou v šabloně tři bloky `<:if test="('{{DISPLAY_ID}}' == 'q')">` / `<:elseif … 'o'>` / `<:else>` (n)
-  s jinou šířkou/výškou skupiny (`4*šířka buňky / šířka displeje`, např. q = 68,670 %) a jinými obrázky.
+  s jinou velikostí skupiny v **pixelech** (q 320×110, o 192×66, n 160×56 = 4 buňky) a jiným řádkem sheetu (`top`).
+  Velikosti jsou statické (px, ne %), jen pozice (`left`/`top`) zůstávají v procentech. Sloty mají `overflow:hidden`, takže se vidí jen jedna buňka.
   Šířka buňky v pixelech musí přesně sedět na buňku v pásu, jinak se posun `left: -100*číslice %` rozjede. Vpravo od minut je v dolní polovině
   řádku číslic malý text AM/PM (`f-t-s`, jen při 12hodinovém formátu hodinek).
 - **Bez bliknutí**: číslice jsou zprvu `visibility:hidden` a odkryjí se až po příchodu času, obou fontů
@@ -115,7 +118,7 @@ při přidání/změně ext souboru ho aktualizuj.
 6. **Manifest**: každá nová `out` hodnota, šablona nebo zdroj musí být v `manifest.json`.
    Neexistující `source` v `in` způsobí, že se aplikace na hodinkách vůbec nenačte.
    Hodnoty v `settings.values` musí odpovídat tomu, co znají `ext01/02/04/05`.
-   Šablony mají `"displays": ["q", "o", "n"]` (UI1 displeje `s`, `m`, `l` nejsou podporované a nemají obrázky);
+   Šablony mají `"displays": ["q", "o", "n", "s", "m", "l"]` (`s` 218 px, `m` 240 px a `l` 320×300 px jsou UI1; `m` používá geometrii a řádek `n`);
    každý obrázek z `src` v šablonách musí být v `image` a existovat pro všechny tři displeje.
 7. **Ladění**: používej `systemEvent('popis', hodnota)` — výstup je vidět v simulátoru/logu editoru.
    Před commitem zbytečné ladicí výpisy odstraň; výjimka jsou diagnostické logy neplatných dat
