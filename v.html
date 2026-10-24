@@ -74,7 +74,7 @@
       ctx.lineCap = 'round';
       ctx.strokeStyle = '#FFFFFF';
       ctx.beginPath();
-      ctx.arc(ctx.width / 2, ctx.height / 2, ctx.width / 2 - ctx.lineWidth * 1.2, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * ringStep / RING_TICKS);
+      ctx.arc(ctx.width / 2, ctx.height / 2, ctx.width / 2 - ctx.lineWidth * 1.2, -Math.PI / 2, -Math.PI / 2 + Math.min(2 * Math.PI * ringStep / RING_TICKS, 2 * Math.PI - 0.01));
       ctx.stroke();
     }
     function ringStart(eventId) {
@@ -112,6 +112,10 @@
       clearInterval(interval);
       blinkOn = false;
       paint();
+    }
+    function ringRelease() {
+      // a finished ring has already sent its event, so releasing after it only resets the ring
+      if (ringStep != RING_TICKS) { ringStop(); }
     }
     function ringAction(eventId) {
       clearInterval(interval);
@@ -196,21 +200,21 @@
       longPressDuration="2.4"
       onLongPressStart="stopBlink(); ringStart(2);"
       onLongPressCancel="ringStop(); startBlink();"
-      onLongPress="ringStop();"
+      onLongPress="ringRelease();"
     />
     <pushButton name="next"
       onClick="$.put('/Zapp/{zapp_index}/Event', 3, null, 'int32');"
       longPressDuration="2.4"
       onLongPressStart="stopBlink(); ringStart(4);"
       onLongPressCancel="ringStop(); startBlink();"
-      onLongPress="ringStop();"
+      onLongPress="ringRelease();"
     />
     <pushButton name="up"
       onClick="$.put('/Zapp/{zapp_index}/Event', 5, null, 'int32');"
       longPressDuration="2.4"
       onLongPressStart="stopBlink(); ringStart(6);"
       onLongPressCancel="ringStop(); startBlink();"
-      onLongPress="ringStop();"
+      onLongPress="ringRelease();"
     />
   </userInput>
 </uiView>
