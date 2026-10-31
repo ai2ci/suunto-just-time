@@ -2,7 +2,7 @@
   "name": "Just time",
   "version": "2.0",
   "author": "artur.chlad",
-  "description": "App shows just time like watchface",
+  "description": "App shows only time like watchface.",
   "type": "feature",
   "usage": "workout",
   "modificationTime": 1773314833,
@@ -38,7 +38,6 @@
       "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]
     }
   ],
-
   "image": [
     { "name": "solid.png", "type": "alpha2bit" },
     { "name": "outl.png", "type": "a64" }

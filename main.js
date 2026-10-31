@@ -1,10 +1,3 @@
-var loadExt = function(id) {
-  // 01 - get next font type
-  // 02 - get font type id
-  // 04 - get next color
-  // 05 - get RGB convert to int by color
-  return evalFile('{file_path}/ext' + id + '.js');
-}
 // templates
 //  - 't' main during activity
 //  - 'u' without user inputs
@@ -16,20 +9,51 @@ var t = 't';
 //  - 2 minuteColor
 var setting_mode = 0;
 
-// defaults used when nothing is stored yet, keep in sync with data.json
+// Setting values are enum indexes stored as strings (order of "values" in manifest.json, saved this way by the Suunto app).
+// Initial values come from data.json. localStorage exists only when data.json is packed into the app (not on every watch),
+// so reads and writes are guarded and the values are also kept in memory for the time the app runs.
+// DEFAULTS is the last resort when neither memory nor localStorage has a value (same values as data.json).
 var DEFAULTS = {
-  fontType: "hh-outline mm-outline",
-  hourColor: "grey",
-  minuteColor: "white"
+  fontType: "3", // hh-outline mm-outline
+  hourColor: "6", // grey
+  minuteColor: "7" // white
 };
+var memory = {};
 
+// localStorage can be missing (ReferenceError) or fail, both give null
+var readStored = function(key) {
+  try {
+    if (typeof localStorage !== "undefined") {
+      return localStorage.getItem(key);
+    }
+  } catch (x) {}
+  return null;
+}
+
+var writeStored = function(key, value) {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(key, value);
+    }
+  } catch (x) {}
+}
+
+// memory (written by setSetting) -> localStorage (data.json or saved before) -> DEFAULTS
 var getSetting = function(key) {
-  return localStorage.getItem(key) || DEFAULTS[key];
+  var value = memory[key];
+  if (value === undefined) {
+    value = readStored(key);
+  }
+  return value === null || value === undefined ? DEFAULTS[key] : value;
+}
+
+var setSetting = function(key, value) {
+  memory[key] = value;
+  writeStored(key, value);
 }
 
 // fontType id: bit 0 = hour digits use outline font, bit 1 = minute digits use outline font
-var setFontOutputs = function(output, fontType) {
-  var id = loadExt('02')(fontType);
+var setFontOutputs = function(output, id) {
   output.hourFont = id % 2;
   output.minuteFont = parseInt(id / 2, 10);
 }
@@ -49,10 +73,12 @@ function onExerciseContinue(input, output) {
 function evaluate(input, output) {}
 
 function onLoad(input, output) {
-  // load defaults from localStorage
-  setFontOutputs(output, getSetting("fontType"));
-  output.hourColor = loadExt('05')(getSetting("hourColor"));
-  output.minuteColor = loadExt('05')(getSetting("minuteColor"));
+  // load settings (memory, localStorage or defaults)
+  // ext01.js: stored font type index -> [index, id], step 0 keeps the same font type
+  setFontOutputs(output, evalFile('{file_path}/ext01.js')(getSetting("fontType"), 0)[1]);
+  // ext04.js: stored colour index -> [index, RGB int], step 0 keeps the same colour
+  output.hourColor = evalFile('{file_path}/ext04.js')(getSetting("hourColor"), 0)[1];
+  output.minuteColor = evalFile('{file_path}/ext04.js')(getSetting("minuteColor"), 0)[1];
   output.settingMode = setting_mode;
 }
 
@@ -72,17 +98,20 @@ function onEvent(input, output, eventId) {
       case 1: // Down - previous value
         var step = eventId == 5 ? 1 : -1;
         if (setting_mode == 0) {
-          var fontType = loadExt('01')(loadExt('02')(getSetting("fontType")), step);
-          localStorage.setItem("fontType", fontType);
-          setFontOutputs(output, fontType);
+          // ext01.js: next font type (step 1 = next, -1 = previous), returns [index, id]
+          var font = evalFile('{file_path}/ext01.js')(getSetting("fontType"), step);
+          setSetting("fontType", font[0]);
+          setFontOutputs(output, font[1]);
         } else if (setting_mode == 1) {
-          var hourColor = loadExt('04')(getSetting("hourColor"), step);
-          localStorage.setItem("hourColor", hourColor);
-          output.hourColor = loadExt('05')(hourColor);
+          // ext04.js: next colour (step 1 = next, -1 = previous), returns [index, RGB int]
+          var hour = evalFile('{file_path}/ext04.js')(getSetting("hourColor"), step);
+          setSetting("hourColor", hour[0]);
+          output.hourColor = hour[1];
         } else {
-          var minuteColor = loadExt('04')(getSetting("minuteColor"), step);
-          localStorage.setItem("minuteColor", minuteColor);
-          output.minuteColor = loadExt('05')(minuteColor);
+          // ext04.js: next colour (step 1 = next, -1 = previous), returns [index, RGB int]
+          var minute = evalFile('{file_path}/ext04.js')(getSetting("minuteColor"), step);
+          setSetting("minuteColor", minute[0]);
+          output.minuteColor = minute[1];
         }
 
         break;

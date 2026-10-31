@@ -104,8 +104,6 @@
       paint();
       setReady('mc');
     });
-    // Fallback so the digits never stay hidden if some value does not arrive
-    setTimeout(function() {pending = 0; render();}, 1000);
     $.get('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);}); // Avoid initial blinking
     $.subscribe('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);});
     "

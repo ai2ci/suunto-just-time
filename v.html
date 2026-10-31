@@ -9,16 +9,16 @@
     var minuteColor = '#FFFFFF';
     // Digits are shown only after time, fonts and colors are known, so they never appear in default look
     var ready = {};
-    var pending = 5;
+    var pending = 6;
     function toHex(c) {
       return '#' + (c + 0x1000000).toString(16).slice(1);
     }
-    // The blinking group is painted black in the off phase (settingMode 0 = both, 1 = hours, 2 = minutes)
-    var blinkOn = true;
+    // The blinking group is painted black while blinkDark is true (settingMode 0 = both, 1 = hours, 2 = minutes)
+    var blinkDark = false;
     function paint() {
       var hc = hourColor;
       var mc = minuteColor;
-      if (blinkOn) {
+      if (blinkDark) {
         if (settingMode != 2) { hc = '#000000'; }
         if (settingMode != 1) { mc = '#000000'; }
       }
@@ -99,18 +99,18 @@
     var interval;
     var shown = false;
     function blink() {
-      blinkOn = !blinkOn;
+      blinkDark = !blinkDark;
       paint();
     }
     function startBlink() {
       clearInterval(interval);
-      blinkOn = true;
+      blinkDark = true;
       paint();
       interval = setInterval(blink, 500);
     }
     function stopBlink() {
       clearInterval(interval);
-      blinkOn = false;
+      blinkDark = false;
       paint();
     }
     function ringRelease() {
@@ -135,11 +135,9 @@
       paint();
       setReady('mc');
     });
-    // Fallback so the digits never stay hidden if some value does not arrive
-    setTimeout(function() {pending = 0; render();}, 1000);
     $.get('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);}); // Avoid initial blinking
     $.subscribe('/Dev/Time/LocalTime/Min', function(v) {customFontTime(v);});
-    $.subscribe('/Zapp/{zapp_index}/Output/settingMode', function(m) {settingMode = m;});
+    $.subscribe('/Zapp/{zapp_index}/Output/settingMode', function(m) {settingMode = m; setReady('sm');});
     "
   onDeactivate="
     clearInterval(interval);
