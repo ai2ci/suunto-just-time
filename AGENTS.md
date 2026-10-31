@@ -102,3 +102,7 @@ Automatické testy neexistují. Změny ověř:
 - Hlavní větev `master`, práce probíhá ve feature větvích.
 - Commity ve stylu Conventional Commits (`feat: …`, `fix: …`).
 - Commituj jen na výslovnou žádost uživatele.
+
+## Vydávání
+
+Vydávání – viz [releases.md](releases.md).
