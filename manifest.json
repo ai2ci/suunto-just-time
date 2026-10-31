@@ -1,0 +1,45 @@
+{
+  "name": "Just time",
+  "version": "1.0",
+  "author": "artur.chlad",
+  "description": "App shows only time like watchface.",
+  "type": "feature",
+  "usage": "workout",
+  "modificationTime": 1773314833,
+  "out": [
+    { "name": "hourFont", "shownName": "hourFont" },
+    { "name": "minuteFont", "shownName": "minuteFont" },
+    { "name": "hourColor", "shownName": "hourColor" },
+    { "name": "minuteColor", "shownName": "minuteColor" },
+    { "name": "settingMode", "shownName": "settingMode" }
+  ],
+  "template": [
+    { "name": "t.html", "displays": ["q", "o", "n", "s", "m", "l"] },
+    { "name": "u.html", "displays": ["q", "o", "n", "s", "m", "l"] },
+    { "name": "v.html", "displays": ["q", "o", "n", "s", "m", "l"] }
+  ],
+  "settings": [
+    {
+      "shownName": "Font type",
+      "path": "fontType",
+      "type": "enum",
+      "values": ["hh-solid mm-solid", "hh-outline mm-solid", "hh-solid mm-outline", "hh-outline mm-outline"]
+    },
+    {
+      "shownName": "Hour color",
+      "path": "hourColor",
+      "type": "enum",
+      "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]
+    },
+    {
+      "shownName": "Minute color",
+      "path": "minuteColor",
+      "type": "enum",
+      "values": ["red", "green", "blue", "azure", "yellow", "orange", "grey", "white"]
+    }
+  ],
+  "image": [
+    { "name": "solid.png", "type": "alpha2bit" },
+    { "name": "outl.png", "type": "a64" }
+  ]
+}
